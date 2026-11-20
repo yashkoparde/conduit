@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONDUIT — MSME Mobile Application</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- React 18 & Babel for standalone instant React deployment -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #08090c; color: #f1f3f7; font-family: 'Inter', sans-serif; min-height: 100vh; }
+    .nav-bar { padding: 1.5rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(12,15,22,0.8); backdrop-filter: blur(12px); }
+    .back-link { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #00e599; text-decoration: none; letter-spacing: 0.1em; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .back-link:hover { text-decoration: underline; }
+    .container { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; }
+    .badge { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #00e599; border: 1px solid rgba(0,229,153,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; display: inline-block; margin-bottom: 1rem; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; margin-bottom: 0.5rem; }
+    .sub { color: #94a3b8; font-size: 1rem; margin-bottom: 2rem; }
+    .card { background: rgba(12,15,22,0.85); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .btn { background: #00e599; color: #000; border: none; padding: 0.8rem 1.6rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .grid-item { border: 1px solid rgba(255,255,255,0.06); padding: 1rem; border-radius: 6px; }
+    .grid-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #717d91; text-transform: uppercase; }
+    .grid-val { font-size: 1.1rem; font-weight: 600; margin-top: 0.2rem; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function MSMEApp() {
+      const [capacity, setCapacity] = React.useState(200);
+      const [orders, setOrders] = React.useState([
+        { id: 'ORD-982', buyer: 'Regional School Council', units: 500, status: 'Demand Identified' },
+        { id: 'ORD-741', buyer: 'Metro Healthcare Group', units: 350, status: 'In Review' }
+      ]);
+
+      return (
+        <div>
+          <nav className="nav-bar">
+            <a href="../../index.html" className="back-link">&larr; BACK TO CONDUIT ECOSYSTEM</a>
+            <span style={{fontFamily: 'JetBrains Mono', fontSize: '0.75rem', color: '#717d91'}}>ELEMENT 01 // REACT APP</span>
+          </nav>
+
+          <main className="container">
+            <span className="badge">ELEMENT 01 // MSME OPPORTUNITY INTERFACE</span>
+            <h1>MSME Mobile Application</h1>
+            <p className="sub">Register operational capacity, declare working capital limits, and receive matched economic demand.</p>
+
+            <div className="card">
+              <h3 style={{fontFamily: 'Space Grotesk', marginBottom: '1rem'}}>Current Operational Capacity</h3>
+              <div className="grid">
+                <div className="grid-item">
+                  <div className="grid-label">Declared Monthly Output</div>
+                  <div className="grid-val">{capacity} Units</div>
+                </div>
+                <div className="grid-item">
+                  <div className="grid-label">Capital Constraint</div>
+                  <div className="grid-val" style={{color: '#ef4444'}}>Raw Material Liquidity</div>
+                </div>
+                <div className="grid-item">
+                  <div className="grid-label">Matched Market Demand</div>
+                  <div className="grid-val" style={{color: '#00e599'}}>850 Units</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <h3 style={{fontFamily: 'Space Grotesk', marginBottom: '1rem'}}>Discovered Opportunities</h3>
+              {orders.map(order => (
+                <div key={order.id} style={{display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid rgba(255,255,255,0.06)'}}>
+                  <div>
+                    <div style={{fontWeight: 600}}>{order.buyer}</div>
+                    <div style={{fontSize: '0.8rem', color: '#717d91'}}>{order.id} &bull; {order.units} units required</div>
+                  </div>
+                  <span style={{fontFamily: 'JetBrains Mono', fontSize: '0.75rem', color: '#00e599'}}>{order.status}</span>
+                </div>
+              ))}
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<MSMEApp />);
+  </script>
+</body>
+</html>
