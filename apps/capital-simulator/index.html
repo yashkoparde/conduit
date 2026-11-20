@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONDUIT — Capital Unlock Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" src="../demo-panel.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
+    a { color: #f8fafc; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,0.4); }
+    a:hover { border-bottom-color: #fff; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
+    .title-nav { font-size: 13px; font-weight: 600; color: #94a3b8; }
+    .title-nav strong { color: #fff; }
+    .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; background: #11141c; border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; margin-bottom: 1.5rem; border-radius: 4px; }
+    @media(max-width: 900px) { .controls { grid-template-columns: 1fr 1fr; } }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    @media(max-width: 1024px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between; }
+    .card.optimal { border-color: rgba(255,255,255,0.3); background: #131824; }
+    .row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .val { color: #fff; font-weight: 600; }
+    input[type=range] { accent-color: #cbd5e1; width: 100%; margin: 0.4rem 0; }
+    input[type=number] { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.4rem; border-radius: 2px; width: 100%; }
+    .tag { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .formula-bar { background: #0d1118; border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const API = 'http://127.0.0.1:8088';
+
+    function App() {
+      const [data, setData] = React.useState(null);
+      const [oppList, setOppList] = React.useState([]);
+      const [selectedOpp, setSelectedOpp] = React.useState('OPP-9001');
+
+      // Custom parameters
+      const [units, setUnits] = React.useState(500);
+      const [sellingPrice, setSellingPrice] = React.useState(750);
+      const [rawCost, setRawCost] = React.useState(320);
+
+      React.useEffect(() => {
+        fetch(`${API}/api/opportunities`).then(r => r.json()).then(res => {
+          setOppList(res.opportunities || []);
+        });
+      }, []);
+
+      const runCompute = (targetId, u, sp, rc) => {
+        fetch(`${API}/api/simulator`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            opportunity_id: targetId,
+            custom_parameters: {
+              units: Number(u),
+              selling_price: Number(sp),
+              raw_cost: Number(rc)
+            }
+          })
+        }).then(r => r.json()).then(res => {
+          if (res.success) setData(res.data);
+        });
+      };
+
+      React.useEffect(() => {
+        runCompute(selectedOpp, units, sellingPrice, rawCost);
+      }, [selectedOpp]);
+
+      if (!data) return <div style={{padding: '2rem'}}>Computing Intervention Scenarios...</div>;
+
+      const inp = data.inputs;
+      const res = data.results;
+
+      return (
+        <div>
+          <div className="top">
+            <div className="title-nav">
+              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong>Capital Unlock Simulator</strong>
+            </div>
+            <div>
+              Target Opportunity: 
+              <select 
+                value={selectedOpp} 
+                onChange={e => setSelectedOpp(e.target.value)}
+                style={{background: '#11141c', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', marginLeft: '0.5rem', padding: '0.35rem', fontFamily: 'inherit'}}
+              >
+                {oppList.map(o => (
+                  <option key={o.id} value={o.id}>{o.id} — {o.msme_name} ({o.units_demanded} units)</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Interactive Calculation Controls */}
+          <div className="controls">
+            <div>
+              <div className="tag">Order Volume</div>
+              <input 
+                type="range" min="100" max="1500" step="25" value={units} 
+                onChange={e => { setUnits(e.target.value); runCompute(selectedOpp, e.target.value, sellingPrice, rawCost); }} 
+              />
+              <div className="val">{units} Units</div>
+            </div>
+
+            <div>
+              <div className="tag">Unit Contract Price</div>
+              <input 
+                type="number" value={sellingPrice} 
+                onChange={e => { setSellingPrice(e.target.value); runCompute(selectedOpp, units, e.target.value, rawCost); }} 
+              />
+              <div style={{color: '#94a3b8', fontSize: '11px', marginTop: '0.2rem'}}>Gross: ₹{(units * sellingPrice).toLocaleString()}</div>
+            </div>
+
+            <div>
+              <div className="tag">Unit Raw Material Cost</div>
+              <input 
+                type="number" value={rawCost} 
+                onChange={e => { setRawCost(e.target.value); runCompute(selectedOpp, units, sellingPrice, e.target.value); }} 
+              />
+              <div style={{color: '#94a3b8', fontSize: '11px', marginTop: '0.2rem'}}>Markup: {rawCost > 0 ? Math.round(((sellingPrice - rawCost) / rawCost) * 100) : 0}%</div>
+            </div>
+
+            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+              <div className="tag">Estimated Capital Required</div>
+              <div style={{fontSize: '20px', fontWeight: 700, color: '#fff'}}>₹{(units * rawCost).toLocaleString()}</div>
+              <div style={{color: '#64748b', fontSize: '10px'}}>Closed-loop escrow disbursed</div>
+            </div>
+          </div>
+
+          {/* Explicit Mathematical Formulas Diagnostic */}
+          <div className="formula-bar">
+            <strong style={{color: '#fff'}}>Deterministic Arbitrage Equations:</strong>
+            <div style={{marginTop: '0.4rem', color: '#cbd5e1'}}>
+              Gross Revenue: R = Q × P_u = {units} × ₹{sellingPrice} = ₹{(units * sellingPrice).toLocaleString()}<br/>
+              Raw Material Capital: C_raw = Q × C_u = {units} × ₹{rawCost} = ₹{(units * rawCost).toLocaleString()}<br/>
+              Debt Service Coverage Margin: DSCM = (R - C_raw) / C_raw = <strong>{rawCost > 0 ? (((sellingPrice - rawCost)/rawCost)*100).toFixed(1) : 0}% ROI</strong>
+            </div>
+          </div>
+
+          {/* 4 Comparative Intervention Modalities */}
+          <div style={{color: '#94a3b8', fontSize: '11px', marginBottom: '0.75rem', fontWeight: 600}}>Simulated Interventions &amp; Computed Yields</div>
+          <div className="grid">
+            {/* Raw Material Escrow */}
+            <div className={`card ${res.raw_material_escrow.is_optimal ? 'optimal' : ''}`}>
+              <div>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
+                  <div className="tag">Intervention 1</div>
+                  {res.raw_material_escrow.is_optimal && <span style={{color: '#fff', fontWeight: 700, fontSize: '10px'}}>Optimal Choice</span>}
+                </div>
+                <div style={{fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0.4rem 0'}}>Raw Material Escrow</div>
+                <div style={{color: '#94a3b8', fontSize: '11px', marginBottom: '1rem'}}>Direct closed-loop supplier disbursement. Zero diversion risk.</div>
+                
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.raw_material_escrow.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Unlocked Revenue</span><span className="val">₹{res.raw_material_escrow.unlocked_revenue_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.raw_material_escrow.net_margin_inr.toLocaleString()}</span></div>
+              </div>
+              <div style={{marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.8rem'}}>
+                <div className="tag">Computed ROI</div>
+                <div style={{fontSize: '22px', fontWeight: 700, color: '#fff'}}>{res.raw_material_escrow.roi_percentage}%</div>
+              </div>
+            </div>
+
+            {/* Machinery Leasing */}
+            <div className={`card ${res.machinery_leasing.is_optimal ? 'optimal' : ''}`}>
+              <div>
+                <div className="tag">Intervention 2</div>
+                <div style={{fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0.4rem 0'}}>Equipment Expansion</div>
+                <div style={{color: '#94a3b8', fontSize: '11px', marginBottom: '1rem'}}>Tooling and machine expansion for capacity deficits.</div>
+                
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.machinery_leasing.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Added Headroom</span><span className="val">{res.machinery_leasing.added_headroom_units} units</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.machinery_leasing.net_margin_inr.toLocaleString()}</span></div>
+              </div>
+              <div style={{marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.8rem'}}>
+                <div className="tag">Computed ROI</div>
+                <div style={{fontSize: '22px', fontWeight: 700, color: '#fff'}}>{res.machinery_leasing.roi_percentage}%</div>
+              </div>
+            </div>
+
+            {/* Storage Upgrades */}
+            <div className={`card ${res.storage_upgrade.is_optimal ? 'optimal' : ''}`}>
+              <div>
+                <div className="tag">Intervention 3</div>
+                <div style={{fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0.4rem 0'}}>Preservation Upgrade</div>
+                <div style={{color: '#94a3b8', fontSize: '11px', marginBottom: '1rem'}}>Prevents 18% inventory spoilage in transit corridor.</div>
+                
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.storage_upgrade.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Spoilage Saved</span><span className="val">{res.storage_upgrade.spoilage_saved_units} units</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.storage_upgrade.net_margin_inr.toLocaleString()}</span></div>
+              </div>
+              <div style={{marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.8rem'}}>
+                <div className="tag">Computed ROI</div>
+                <div style={{fontSize: '22px', fontWeight: 700, color: '#fff'}}>{res.storage_upgrade.roi_percentage}%</div>
+              </div>
+            </div>
+
+            {/* Working Capital Line */}
+            <div className={`card ${res.working_capital_line.is_optimal ? 'optimal' : ''}`}>
+              <div>
+                <div className="tag">Intervention 4</div>
+                <div style={{fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0.4rem 0'}}>Revolving Overdraft</div>
+                <div style={{color: '#94a3b8', fontSize: '11px', marginBottom: '1rem'}}>Standard line with 28% estimated diversion leakage.</div>
+                
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.working_capital_line.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Fulfilled Volume</span><span className="val">{res.working_capital_line.fulfilled_units} units</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.working_capital_line.net_margin_inr.toLocaleString()}</span></div>
+              </div>
+              <div style={{marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.8rem'}}>
+                <div className="tag">Computed ROI</div>
+                <div style={{fontSize: '22px', fontWeight: 700, color: '#fff'}}>{res.working_capital_line.roi_percentage}%</div>
+              </div>
+            </div>
+          </div>
+
+          <DemoSection onUpdate={() => runCompute(selectedOpp, units, sellingPrice, rawCost)} currentOppId={selectedOpp} />
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
