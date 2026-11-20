@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ಕಾಂಡ್ಯೂಟ್</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">ಮುಖಪುಟ</string>
+    <string name="nav_voice_apply">ಧ್ವನಿ ಸಾಲ</string>
+    <string name="nav_passport">ಪಾಸ್‌ಪೋರ್ಟ್</string>
+    <string name="nav_repayment">ಮರುಪಾವತಿ</string>
+
+    <!-- Language Toggle -->
+    <string name="language_toggle_label">English</string>
+    <string name="language_toggle_cd">ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಭಾಷೆ ಬದಲಿಸಿ</string>
+
+    <!-- Home Screen -->
+    <string name="home_greeting_primary">ನಮಸ್ಕಾರ ರವಿ ಅವರೇ</string>
+    <string name="home_business_subtitle">ಹುಬ್ಬಳ್ಳಿ ಪ್ರಾವಿಷನ್ ಸ್ಟೋರ್ • ಹುಬ್ಬಳ್ಳಿ</string>
+    <string name="home_verified_merchant_badge">UPI ದೃಢೀಕೃತ ವ್ಯಾಪಾರಿ</string>
+    <string name="home_solvency_title">ಕ್ರೆಡಿಟ್ ಆರೋಗ್ಯ ಸ್ಕೋರ್</string>
+    <string name="home_solvency_tier">ಪ್ರೈಮ್ ಶ್ರೇಣಿ</string>
+    <string name="home_solvency_out_of">900 ರಲ್ಲಿ</string>
+    <string name="home_solvency_caption">12 ತಿಂಗಳ ನಿರಂತರ PhonePe ಮತ್ತು GPay ವಹಿವಾಟಿನ ಆಧಾರದ ಮೇಲೆ</string>
+    <string name="home_preapproved_limit">ಪೂರ್ವ-ಅನುಮೋದಿತ ಮಿತಿ: ₹1,00,000</string>
+    <string name="home_stat_daily_upi_label">ದೈನಂದಿನ UPI ವಹಿವಾಟು</string>
+    <string name="home_stat_daily_upi_value">₹6,200</string>
+    <string name="home_stat_consistency_label">ವಹಿವಾಟು ಸ್ಥಿರತೆ</string>
+    <string name="home_stat_consistency_value">98.2%</string>
+    <string name="home_stat_saved_label">ಒಟ್ಟು ಬಡ್ಡಿ ಉಳಿತಾಯ</string>
+    <string name="home_stat_saved_value">₹17,400</string>
+    <string name="home_hero_festival_tag">ಹಬ್ಬದ ವ್ಯಾಪಾರ ಬಂಡವಾಳ</string>
+    <string name="home_hero_title">ಹಬ್ಬದ ವ್ಯಾಪಾರಕ್ಕೆ ಬಂಡವಾಳ ಬೇಕೇ?</string>
+    <string name="home_hero_subtitle">ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ, ಕೇವಲ 2 ಗಂಟೆಯಲ್ಲಿ 13.2% ಕಡಿಮೆ ಬಡ್ಡಿಗೆ ಸಾಲ ಪಡೆಯಿರಿ.</string>
+    <string name="home_hero_cta">ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ</string>
+    <string name="home_active_loan_title">ಸಕ್ರಿಯ ಸಾಲದ ಮರುಪಾವತಿ</string>
+    <string name="home_active_loan_autopay_badge">UPI ಆಟೋಪೇ ಸಕ್ರಿಯ</string>
+    <string name="home_active_loan_daily_sweep">ದಿನಕ್ಕೆ ₹220 • ರಾತ್ರಿ 9:00 ಕ್ಕೆ ಸ್ವಯಂ ಪಾವತಿ</string>
+    <string name="home_active_loan_progress_format">₹%2$s ರಲ್ಲಿ ₹%1$s ಪಾವತಿಸಲಾಗಿದೆ</string>
+    <string name="home_active_loan_days_left">ಇನ್ನೂ %1$d ದಿನಗಳು ಬಾಕಿ</string>
+    <string name="home_view_tracker_cta">ವಿವರ ನೋಡಿ</string>
+    <string name="home_quick_passport_title">ವ್ಯಾಪಾರ ಹಣಕಾಸು ಪಾಸ್‌ಪೋರ್ಟ್</string>
+    <string name="home_quick_passport_subtitle">ದೃಢೀಕೃತ UPI ವಹಿವಾಟು ದಾಖಲೆಯನ್ನು ಬ್ಯಾಂಕ್‌ಗಳಿಗೆ ಸುಲಭವಾಗಿ ತೋರಿಸಿ</string>
+
+    <!-- Voice Apply Screen -->
+    <string name="voice_screen_title">ಧ್ವನಿ ಸಾಲ ಅರ್ಜಿ</string>
+    <string name="voice_screen_subtitle">ಯಾವುದೇ ಫಾರ್ಮ್ ಬೇಡ. ಕನ್ನಡ, ಹಿಂದಿ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ ಸಹಜವಾಗಿ ಮಾತನಾಡಿ.</string>
+    <string name="voice_step_speak">1. ಮಾತನಾಡಿ</string>
+    <string name="voice_step_verify">2. 1-ಟ್ಯಾಪ್ ದೃಢೀಕರಣ</string>
+    <string name="voice_step_disburse">3. ಹಣ ಪಡೆಯಿರಿ</string>
+    <string name="voice_mic_idle_hint">ಮೈಕ್ ಒತ್ತಿ ಮತ್ತು ನಿಮ್ಮ ಅಂಗಡಿಗೆ ಎಷ್ಟು ಬಂಡವಾಳ ಬೇಕು ಎಂದು ಹೇಳಿ</string>
+    <string name="voice_mic_sample_prompt">ಹೀಗೆ ಹೇಳಿ: “ನನಗೆ ದೀಪಾವಳಿ ಹಬ್ಬದ ಸಾಮಾನಿಗೆ 50,000 ರೂಪಾಯಿ 3 ತಿಂಗಳಿಗೆ ಬೇಕು.”</string>
+    <string name="voice_mic_recording_hint">ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತಿದೆ… ಮುಗಿಸಲು ಮತ್ತೊಮ್ಮೆ ಒತ್ತಿ</string>
+    <string name="voice_mic_transcribing_hint">Groq AI ಮೂಲಕ ಅನುವಾದಿಸಲಾಗುತ್ತಿದೆ (ಕನ್ನಡ • ಹಿಂದಿ • ಇಂಗ್ಲಿಷ್)…</string>
+    <string name="voice_mic_button_cd">ಧ್ವನಿ ಸಾಲದ ಮೈಕ್ರೊಫೋನ್ ಬಟನ್</string>
+    <string name="voice_mic_tap_to_speak">ಮಾತನಾಡಲು ಒತ್ತಿ</string>
+    <string name="voice_mic_tap_to_stop">ನಿಲ್ಲಿಸಲು ಒತ್ತಿ</string>
+    <string name="voice_transcription_title">ನೀವು ಹೇಳಿದ ಮಾತು</string>
+    <string name="voice_detected_kannada">ಗುರುತಿಸಿದ ಭಾಷೆ: ಕನ್ನಡ</string>
+    <string name="voice_original_speech_label">ಕನ್ನಡ ಧ್ವನಿ</string>
+    <string name="voice_english_translation_label">ಇಂಗ್ಲಿಷ್ ಅನುವಾದ</string>
+    <string name="voice_extracted_terms_title">ಸ್ವಯಂ ಗುರುತಿಸಿದ ಸಾಲದ ವಿವರ</string>
+    <string name="voice_term_amount_label">ಸಾಲದ ಮೊತ್ತ</string>
+    <string name="voice_term_tenure_label">ಅವಧಿ</string>
+    <string name="voice_term_daily_label">ದೈನಂದಿನ ಪಾವತಿ</string>
+    <string name="voice_term_purpose_label">ವ್ಯಾಪಾರದ ಉದ್ದೇಶ</string>
+    <string name="voice_term_days_format">%1$d ದಿನಗಳು</string>
+    <string name="voice_proceed_aa_cta">RBI AA ಮೂಲಕ 1-ಟ್ಯಾಪ್ ದೃಢೀಕರಣ</string>
+    <string name="voice_record_again_cta">ಮತ್ತೊಮ್ಮೆ ಮಾತನಾಡಿ</string>
+
+    <!-- Account Aggregator Modal -->
+    <string name="aa_modal_badge">RBI ನಿಯಂತ್ರಿತ • ಸಹಮತಿ AA</string>
+    <string name="aa_modal_title">1 ಟ್ಯಾಪ್‌ನಲ್ಲಿ UPI ವಹಿವಾಟು ದೃಢೀಕರಿಸಿ</string>
+    <string name="aa_modal_description">ಸಹಮತಿ AA ಮೂಲಕ ನಿಮ್ಮ PhonePe/GooglePay ವಹಿವಾಟನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ದೃಢೀಕರಿಸಿ. ಬ್ಯಾಂಕ್‌ಗೆ ಹೋಗುವ ಅಗತ್ಯವಿಲ್ಲ. ಕಾಗದಪತ್ರಗಳಿಲ್ಲ.</string>
+    <string name="aa_modal_handle_label">ಅಕೌಂಟ್ ಅಗ್ರಿಗೇಟರ್ ಐಡಿ</string>
+    <string name="aa_modal_otp_label">6-ಅಂಕಿಯ ಸಹಮತಿ OTP</string>
+    <string name="aa_modal_privacy_note">ಕೇವಲ 12 ತಿಂಗಳ UPI ವಹಿವಾಟಿನ ಸಾರಾಂಶ. ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ಪಿನ್ ಎಂದಿಗೂ ಕೇಳುವುದಿಲ್ಲ.</string>
+    <string name="aa_modal_approve_cta">ಒಪ್ಪಿಗೆ ನೀಡಿ ಮತ್ತು ಅರ್ಹತೆ ನೋಡಿ</string>
+    <string name="aa_modal_cancel_cta">ಈಗ ಬೇಡ</string>
+
+    <!-- Underwriting Progress -->
+    <string name="underwriting_title">ನಿಮಗೆ ಉತ್ತಮ ಬ್ಯಾಂಕ್ ಆಫರ್ ಸಿದ್ಧವಾಗುತ್ತಿದೆ</string>
+    <string name="underwriting_subtitle">ಸಾಮಾನ್ಯವಾಗಿ 10 ಸೆಕೆಂಡ್‌ಗಳಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ</string>
+    <string name="underwriting_step_1">ದೈನಂದಿನ UPI ಆದಾಯದ ಸ್ಥಿರತೆ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…</string>
+    <string name="underwriting_step_2">ಅತ್ಯಂತ ಕಡಿಮೆ ಬಡ್ಡಿಯ ಬ್ಯಾಂಕ್ ಪಾಲುದಾರರನ್ನು ಆಯ್ಕೆ ಮಾಡಲಾಗುತ್ತಿದೆ…</string>
+    <string name="underwriting_step_3">ನಿಮ್ಮ ಸುರಕ್ಷಿತ ವ್ಯಾಪಾರ ಕ್ರೆಡಿಟ್ ಪಾಸ್‌ಪೋರ್ಟ್ ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ…</string>
+    <string name="underwriting_step_done">ದೃಢೀಕರಿಸಲಾಗಿದೆ</string>
+
+    <!-- Approved Offer Sheet -->
+    <string name="offer_approved_badge">ಅನುಮೋದಿಸಲಾಗಿದೆ • ತ್ವರಿತ ವರ್ಗಾವಣೆ</string>
+    <string name="offer_approved_title">ನಿಮ್ಮ ಅಂಗಡಿಗೆ ₹%1$s ಸಿದ್ಧವಾಗಿದೆ!</string>
+    <string name="offer_approved_subtitle">2 ಗಂಟೆಯೊಳಗೆ ಹುಬ್ಬಳ್ಳಿ ಪ್ರಾವಿಷನ್ ಸ್ಟೋರ್ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ UPI ಮೂಲಕ ನೇರವಾಗಿ ಹಣ ಬರುತ್ತದೆ.</string>
+    <string name="offer_rate_label">ಪ್ರೈಮ್ ಬಡ್ಡಿ ದರ</string>
+    <string name="offer_rate_value">%1$s%% ವಾರ್ಷಿಕ</string>
+    <string name="offer_daily_sweep_label">ಸುಲಭ ದೈನಂದಿನ UPI ಪಾವತಿ</string>
+    <string name="offer_daily_sweep_value">₹%1$s / ದಿನ</string>
+    <string name="offer_savings_callout">48% ಮೀಟರ್ ಬಡ್ಡಿ ಸಾಲಕ್ಕೆ ಹೋಲಿಸಿದರೆ ನೀವು ₹17,400 ಬಡ್ಡಿ ಉಳಿಸುತ್ತೀರಿ!</string>
+    <string name="offer_disburse_cta">UPI ಮೂಲಕ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಹಣ ಪಡೆಯಿರಿ</string>
+    <string name="offer_disbursed_title">UPI ಮೂಲಕ ಹಣ ವರ್ಗಾವಣೆ ಪ್ರಾರಂಭವಾಗಿದೆ!</string>
+    <string name="offer_disbursed_subtitle">₹%1$s ಹಣ %2$s ಖಾತೆಗೆ ಬರುತ್ತಿದೆ. ನಿಮ್ಮ ಮೊದಲ ₹%3$s ದೈನಂದಿನ ಪಾವತಿ ನಾಳೆ ರಾತ್ರಿ 9:00 ಕ್ಕೆ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ.</string>
+    <string name="offer_go_to_repayment_cta">ದೈನಂದಿನ ಮರುಪಾವತಿ ಟ್ರ್ಯಾಕರ್ ತೆರೆಯಿರಿ</string>
+    <string name="offer_apply_new_cta">ಹೊಸ ಧ್ವನಿ ಸಾಲ ಅರ್ಜಿ</string>
+    <string name="voice_error_retry">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+
+    <!-- Digital Twin Screen -->
+    <string name="passport_title">ವ್ಯಾಪಾರ ಹಣಕಾಸು ಪಾಸ್‌ಪೋರ್ಟ್</string>
+    <string name="passport_subtitle">ಬ್ಯಾಂಕ್‌ಗಳು ತಕ್ಷಣ ನಂಬುವ ನಿಮ್ಮ ದೃಢೀಕೃತ ವ್ಯಾಪಾರದ ಶಕ್ತಿ</string>
+    <string name="passport_verified_status">ಸಕ್ರಿಯ ಮತ್ತು ಸುರಕ್ಷಿತ</string>
+    <string name="passport_merchant_meta">ಹುಬ್ಬಳ್ಳಿ • ಕಿರಾಣಿ ಅಂಗಡಿ • UPI: ravi.hubballi@okaxis</string>
+    <string name="passport_chart_title">12 ತಿಂಗಳ UPI ಆದಾಯ ಸ್ಥಿರತೆ</string>
+    <string name="passport_chart_subtitle">ಮಾಸಿಕ ದೃಢೀಕೃತ ಮಾರಾಟ (ಸಾವಿರ ರೂಪಾಯಿಗಳಲ್ಲಿ)</string>
+    <string name="passport_chart_peak_tag">ಹಬ್ಬದ ಗರಿಷ್ಠ ಮಾರಾಟ</string>
+    <string name="passport_chart_avg_label">ಮಾಸಿಕ ಸರಾಸರಿ: ₹1.86 ಲಕ್ಷ</string>
+    <string name="passport_festival_title">ಹಬ್ಬದ ವ್ಯಾಪಾರ ಸಿದ್ಧತೆ</string>
+    <string name="passport_festival_diwali">ದೀಪಾವಳಿ ಸ್ಟಾಕ್ ಹೆಚ್ಚಳ: +42% ನಿರೀಕ್ಷಿತ UPI ಮಾರಾಟ</string>
+    <string name="passport_festival_ugadi">ಯುಗಾದಿ ಮತ್ತು ದಸರಾ ದಾಖಲೆ: 100% ಸಮಯಕ್ಕೆ ಸರಿಯಾದ ಮಾರಾಟ</string>
+    <string name="passport_festival_badge">ಹಬ್ಬದ ಟಾಪ್-ಅಪ್ ಸಾಲಕ್ಕೆ ಪೂರ್ವ-ಅರ್ಹತೆ</string>
+    <string name="passport_social_title">ಸಮುದಾಯದ ನಂಬಿಕೆ ಮತ್ತು ಸಾಮಾಜಿಕ ಭದ್ರತೆ</string>
+    <string name="passport_social_org">ಸಂಜೀವಿನಿ NRLM ಸ್ವಸಹಾಯ ಸಂಘ ಮತ್ತು ಹುಬ್ಬಳ್ಳಿ ಕಿರಾಣಿ ವ್ಯಾಪಾರಿಗಳ ಸಂಘ</string>
+    <string name="passport_social_score">98% ನಿಷ್ಕಳಂಕ ದಾಖಲೆ</string>
+    <string name="passport_social_desc">14 ಸ್ಥಳೀಯ ವ್ಯಾಪಾರಿಗಳು ಮತ್ತು 3 ಸಗಟು ವಿತರಕರಿಂದ ದೃಢೀಕರಿಸಲ್ಪಟ್ಟಿದೆ.</string>
+    <string name="passport_qr_title">ದೃಢೀಕೃತ ಕ್ರೆಡಿಟ್ QR ಕೋಡ್</string>
+    <string name="passport_qr_subtitle">ನಿಮ್ಮ ಖಾಸಗಿ ಬ್ಯಾಂಕ್ ವಿವರಗಳನ್ನು ತೋರಿಸದೆ ಯಾವುದೇ ಬ್ಯಾಂಕ್ ಅಥವಾ ವಿತರಕರಿಗೆ ನಿಮ್ಮ 785 ಪ್ರೈಮ್ ಸ್ಕೋರ್ ತೋರಿಸಿ.</string>
+    <string name="passport_qr_hash_label">ದೃಢೀಕರಣ ಸಂಖ್ಯೆ</string>
+    <string name="passport_share_cta">ಕ್ರೆಡಿಟ್ ಪ್ರೂಫ್ ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="passport_shared_toast">ದೃಢೀಕೃತ ಕ್ರೆಡಿಟ್ ಪಾಸ್‌ಪೋರ್ಟ್ ಹಂಚಿಕೆಗೆ ಸಿದ್ಧವಾಗಿದೆ</string>
+
+    <!-- Repayment Screen -->
+    <string name="repayment_title">ದೈನಂದಿನ ಮರುಪಾವತಿ ಟ್ರ್ಯಾಕರ್</string>
+    <string name="repayment_subtitle">ಅಂಗಡಿ ಮುಚ್ಚುವ ಸಮಯಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುವ ದಿನಕ್ಕೆ ₹220 ಸುಲಭ UPI ಆಟೋಪೇ</string>
+    <string name="repayment_repaid_format">₹%2$s ರಲ್ಲಿ ₹%1$s ಮರುಪಾವತಿ</string>
+    <string name="repayment_remaining_label">ಬಾಕಿ ಮೊತ್ತ</string>
+    <string name="repayment_days_left_label">ಬಾಕಿ ದಿನಗಳು</string>
+    <string name="repayment_today_status">ಇಂದು ರಾತ್ರಿ 9:00 ಕ್ಕೆ ಸ್ವಯಂ UPI ಆಟೋಪೇ ಮೂಲಕ ₹%1$s ಪಾವತಿಯಾಗಿದೆ.</string>
+    <string name="repayment_simulate_cta">ಇಂದಿನ ₹220 UPI ಪಾವತಿ ದಾಖಲಿಸಿ</string>
+    <string name="repayment_simulate_done_cta">ಇಂದಿನ ಪಾವತಿ ಯಶಸ್ವಿ!</string>
+    <string name="repayment_comparison_title">ಮೀಟರ್ ಬಡ್ಡಿಯಿಂದ ಮುಕ್ತಿ</string>
+    <string name="repayment_comparison_subtitle">ಖಾಸಗಿ ಮೀಟರ್ ಬಡ್ಡಿಗೆ ಹೋಲಿಸಿದರೆ ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೆ ಉಳಿಯುವ ಹಣ</string>
+    <string name="repayment_moneylender_label">ಮೀಟರ್ ಬಡ್ಡಿ ಸಾಲದ ವೆಚ್ಚ (48% ಬಡ್ಡಿ)</string>
+    <string name="repayment_moneylender_value">₹72,000</string>
+    <string name="repayment_conduit_label">ಕಾಂಡ್ಯೂಟ್ ಬ್ಯಾಂಕ್ ಸಾಲದ ವೆಚ್ಚ (13.2% ಬಡ್ಡಿ)</string>
+    <string name="repayment_conduit_value">₹51,650</string>
+    <string name="repayment_saved_banner">ನೀವು ₹%1$s ಬಡ್ಡಿ ಉಳಿಸಿದ್ದೀರಿ!</string>
+    <string name="repayment_history_title">ಇತ್ತೀಚಿನ ದೈನಂದಿನ UPI ಪಾವತಿಗಳು</string>
+    <string name="repayment_download_cta">ನೋ-ಡ್ಯೂ ಪ್ರಮಾಣಪತ್ರ ಮತ್ತು CIBIL ವರದಿ ಪಡೆಯಿರಿ</string>
+    <string name="repayment_download_success">CIBIL ಕ್ರೆಡಿಟ್ ಅಪ್‌ಗ್ರೇಡ್ ವರದಿ ಮತ್ತು ರಶೀದಿ ಸಿದ್ಧವಾಗಿದೆ!</string>
+    <string name="repayment_cibil_boost_note">ಪ್ರತಿ ಸಮಯೋಚಿತ ₹220 ಪಾವತಿಯು ನಿಮ್ಮ ಅಧಿಕೃತ CIBIL ಸ್ಕೋರ್ ಹೆಚ್ಚಿಸುತ್ತದೆ.</string>
+</resources>
