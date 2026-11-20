@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONDUIT — Opportunity-Backed Loan Compiler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
+    a { color: #f8fafc; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,0.4); }
+    a:hover { border-bottom-color: #fff; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
+    .title-nav { font-size: 13px; font-weight: 600; color: #94a3b8; }
+    .title-nav strong { color: #fff; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media(max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 4px; }
+    .btn { background: #f8fafc; color: #090a0d; border: 1px solid #fff; padding: 0.6rem 1.2rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+    .btn:hover { background: #e2e8f0; }
+    .row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .val { color: #fff; font-weight: 600; }
+    .milestone { background: #0c0f16; border-left: 3px solid #38bdf8; padding: 0.8rem 1rem; margin: 0.6rem 0; border-radius: 2px; }
+    .score-meter { height: 6px; background: #1e2638; margin: 0.6rem 0 1rem 0; border-radius: 3px; overflow: hidden; }
+    .score-fill { height: 100%; background: #38bdf8; transition: width 0.3s; }
+    .badge { font-size: 10px; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 2px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); color: #fff; }
+    .pillar-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .pillar-bar { width: 100px; height: 4px; background: #1a2230; border-radius: 2px; overflow: hidden; margin-left: 1rem; }
+    .pillar-fill { height: 100%; background: #38bdf8; }
+    input, select { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.4rem; border-radius: 2px; width: 100%; margin-top: 0.2rem; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const API = 'http://127.0.0.1:8088';
+
+    // Shared Inline Demo Section
+    function DemoSection({ onUpdate, currentOppId = 'OPP-9001' }) {
+      const [isOpen, setIsOpen] = React.useState(false);
+      const [activeStep, setActiveStep] = React.useState(1);
+      const [audit, setAudit] = React.useState(null);
+      const [loading, setLoading] = React.useState(false);
+
+      const steps = [
+        { num: 1, title: '1. Baseline Deficit', desc: 'Idle capacity detected; unverified credit hold.' },
+        { num: 2, title: '2. Buyer Escrow', desc: 'Buyer confirms 375k PO & locks 35% proof.' },
+        { num: 3, title: '3. Supplier Stock', desc: 'Fabric supplier allocates 160k stock @ 320.' },
+        { num: 4, title: '4. Full Unlock', desc: '100% Quad consensus reached. Auto-approved.' }
+      ];
+
+      const runStep = (stepNum) => {
+        setLoading(true);
+        fetch(`${API}/api/demo/execute-step?step=${stepNum}&opportunity_id=${currentOppId}`)
+          .then(r => r.json())
+          .then(res => {
+            setLoading(false);
+            setActiveStep(stepNum);
+            setAudit(res.audit);
+            if (onUpdate) onUpdate(res);
+          })
+          .catch(err => {
+            setLoading(false);
+            console.error(err);
+          });
+      };
+
+      React.useEffect(() => {
+        fetch(`${API}/api/score?id=${currentOppId}`)
+          .then(r => r.json())
+          .then(res => {
+            if (res.data) {
+              const s = res.data.score;
+              if (s >= 800) setActiveStep(4);
+              else if (s >= 700) setActiveStep(3);
+              else if (s >= 600) setActiveStep(2);
+              else setActiveStep(1);
+            }
+          })
+          .catch(() => {});
+      }, [currentOppId]);
+
+      return (
+        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999, fontFamily: "'JetBrains Mono', monospace" }}>
+          {!isOpen ? (
+            <button
+              onClick={() => setIsOpen(true)}
+              style={{
+                background: '#11141c',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.3)',
+                padding: '0.65rem 1.1rem',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8' }}></span>
+              Demo Walkthrough
+            </button>
+          ) : (
+            <div style={{ width: '380px', background: '#0d1017', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', boxShadow: '0 10px 40px rgba(0,0,0,0.8)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ background: '#131824', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Interactive Demo Simulation</div>
+                  <div style={{ fontSize: '10px', color: '#94a3b8' }}>Live SQLite Mutation &amp; Credit Recompute</div>
+                </div>
+                <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '16px', cursor: 'pointer' }}>&times;</button>
+              </div>
+
+              <div style={{ padding: '0.8rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem', background: '#0a0d14' }}>
+                {steps.map(s => (
+                  <button
+                    key={s.num}
+                    onClick={() => runStep(s.num)}
+                    disabled={loading}
+                    style={{
+                      background: activeStep === s.num ? '#1e293b' : '#11141c',
+                      color: activeStep === s.num ? '#fff' : '#64748b',
+                      border: activeStep === s.num ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.06)',
+                      padding: '0.45rem 0.2rem',
+                      borderRadius: '3px',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    Step {s.num}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ padding: '1rem', maxHeight: '340px', overflowY: 'auto', fontSize: '11px', color: '#cbd5e1', lineHeight: '1.5' }}>
+                <div style={{ fontWeight: 700, color: '#fff', fontSize: '12px', marginBottom: '0.4rem' }}>
+                  {steps[activeStep - 1].title}
+                </div>
+
+                {audit ? (
+                  <div>
+                    <div style={{ background: '#111622', padding: '0.6rem', borderRadius: '3px', marginBottom: '0.6rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ color: '#94a3b8', fontSize: '10px', textTransform: 'uppercase' }}>Computed Parameters</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.2rem 0' }}>
+                        <span>Consensus Ratio:</span>
+                        <strong style={{ color: '#fff' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.2rem 0' }}>
+                        <span>Live Credit Score:</span>
+                        <strong style={{ color: '#fff' }}>{audit.score} / 900 ({audit.tier})</strong>
+                      </div>
+                    </div>
+
+                    <div style={{ color: '#94a3b8', marginBottom: '0.6rem' }}>
+                      <strong style={{ color: '#cbd5e1' }}>Deterministic Action:</strong><br />
+                      {audit.explanation}
+                    </div>
+
+                    <div style={{ background: '#151922', padding: '0.6rem', borderRadius: '3px', borderLeft: '2px solid #38bdf8' }}>
+                      <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Lender Verdict</div>
+                      <div style={{ fontWeight: 600, color: '#fff', marginTop: '0.1rem' }}>{audit.lender_verdict}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ color: '#94a3b8', marginBottom: '0.8rem' }}>{steps[activeStep - 1].desc}</p>
+                    <button
+                      onClick={() => runStep(activeStep)}
+                      disabled={loading}
+                      style={{
+                        width: '100%',
+                        background: '#f8fafc',
+                        color: '#090a0d',
+                        border: 'none',
+                        padding: '0.5rem',
+                        borderRadius: '2px',
+                        fontWeight: 700,
+                        fontSize: '11px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {loading ? 'Computing...' : `Execute Step ${activeStep}`}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ background: '#0a0d14', padding: '0.6rem 1rem', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '10px', color: '#64748b', display: 'flex', justifyContent: 'space-between' }}>
+                <span>Target: {currentOppId}</span>
+                <span style={{ color: '#38bdf8' }}>SQLite Verified</span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      const [contract, setContract] = React.useState(null);
+      const [scoreData, setScoreData] = React.useState(null);
+      const [oppList, setOppList] = React.useState([]);
+      const [selectedOpp, setSelectedOpp] = React.useState('OPP-9001');
+
+      // Custom loan terms for lender tuning
+      const [customRate, setCustomRate] = React.useState(10.5);
+      const [customTenor, setCustomTenor] = React.useState(90);
+
+      const load = (oppId) => {
+        fetch(`${API}/api/loan-designer/contract?opportunity_id=${oppId}`)
+          .then(r => r.json())
+          .then(res => setContract(res.contract || null))
+          .catch(e => console.error(e));
+
+        fetch(`${API}/api/score?id=${oppId}`)
+          .then(r => r.json())
+          .then(res => setScoreData(res.data || null))
+          .catch(e => console.error(e));
+      };
+
+      React.useEffect(() => {
+        fetch(`${API}/api/opportunities`)
+          .then(r => r.json())
+          .then(res => {
+            setOppList(res.opportunities || []);
+          })
+          .catch(e => console.error(e));
+        load(selectedOpp);
+      }, [selectedOpp]);
+
+      const recompile = () => {
+        fetch(`${API}/api/loan-designer/compile`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            opportunity_id: selectedOpp,
+            custom_terms: {
+              interest_rate: Number(customRate),
+              tenor_days: Number(customTenor)
+            }
+          })
+        }).then(() => load(selectedOpp));
+      };
+
+      return (
+        <div>
+          <div className="top">
+            <div className="title-nav">
+              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong>Opportunity-Backed Loan Compiler</strong>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+              <div>
+                Target Opportunity: 
+                <select 
+                  value={selectedOpp} 
+                  onChange={e => setSelectedOpp(e.target.value)}
+                  style={{background: '#11141c', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', marginLeft: '0.5rem', padding: '0.35rem', width: 'auto'}}
+                >
+                  {oppList.map(o => (
+                    <option key={o.id} value={o.id}>{o.id} — {o.msme_name}</option>
+                  ))}
+                </select>
+              </div>
+              <button className="btn" onClick={recompile}>Compile Contract</button>
+            </div>
+          </div>
+
+          <div className="grid">
+            {/* Left: Lender Credit Scoring Assessment & 5-Pillar Methodology */}
+            <div className="card">
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                <div>
+                  <div style={{fontSize: '11px', color: '#94a3b8'}}>Lender Evaluation Model</div>
+                  <div style={{fontSize: '16px', fontWeight: 700, color: '#fff', marginTop: '0.2rem'}}>Transactional Credit Score</div>
+                </div>
+                {scoreData && (
+                  <div style={{textAlign: 'right'}}>
+                    <div style={{fontSize: '26px', fontWeight: 700, color: '#fff'}}>{scoreData.score}</div>
+                    <span className="badge">{scoreData.tier}</span>
+                  </div>
+                )}
+              </div>
+
+              {scoreData && (
+                <div style={{marginTop: '1rem'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8'}}>
+                    <span>Base 300</span>
+                    <span>Empirical Range (300 to 900)</span>
+                    <span>Max 900</span>
+                  </div>
+                  <div className="score-meter">
+                    <div className="score-fill" style={{width: `${((scoreData.score - 300) / 600) * 100}%`}}></div>
+                  </div>
+
+                  <div style={{background: '#0c0f16', padding: '0.9rem', borderRadius: '4px', marginBottom: '1.2rem', border: '1px solid rgba(255,255,255,0.06)'}}>
+                    <div style={{fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase'}}>Lender Underwriting Determination</div>
+                    <div style={{color: '#fff', fontWeight: 700, fontSize: '13px', margin: '0.2rem 0'}}>{scoreData.action}</div>
+                    <div className="row" style={{border: 'none', padding: '0.2rem 0'}}>
+                      <span>Recommended LTV:</span>
+                      <span className="val">{scoreData.breakdown?.lender_assessment?.recommended_ltv || '80%'}</span>
+                    </div>
+                    <div className="row" style={{border: 'none', padding: '0.2rem 0'}}>
+                      <span>Recommended Pricing:</span>
+                      <span className="val">{scoreData.breakdown?.lender_assessment?.recommended_pricing || 'Prime + 2.50%'}</span>
+                    </div>
+                  </div>
+
+                  <div style={{fontSize: '11px', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 600}}>5-Pillar Score Composition</div>
+                  {scoreData.breakdown?.pillars && Object.entries(scoreData.breakdown.pillars).map(([k, p]) => (
+                    <div key={k} className="pillar-row">
+                      <div style={{flex: 1}}>
+                        <div style={{color: '#fff', fontWeight: 600}}>{p.label}</div>
+                        <div style={{fontSize: '10px', color: '#94a3b8'}}>{p.factor}</div>
+                      </div>
+                      <div style={{display: 'flex', alignItems: 'center'}}>
+                        <span className="val">{p.earned} / {p.max}</span>
+                        <div className="pillar-bar">
+                          <div className="pillar-fill" style={{width: `${(p.earned / p.max) * 100}%`}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Compiled Escrow Loan Contract */}
+            <div className="card">
+              <div style={{fontSize: '11px', color: '#94a3b8'}}>Disbursement Specification</div>
+              <div style={{fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0.2rem 0 1rem 0'}}>
+                Tri-Party Closed-Loop Agreement
+              </div>
+
+              {contract ? (
+                <div>
+                  <div className="row"><span>Contract ID</span><span className="val">{contract.contract_id}</span></div>
+                  <div className="row"><span>Approved Principal</span><span className="val">₹{Number(contract.principal).toLocaleString()}</span></div>
+                  <div className="row"><span>Interest Rate (p.a.)</span><span className="val">{contract.rate_pct}%</span></div>
+                  <div className="row"><span>Tenure</span><span className="val">{contract.tenure_months ? `${contract.tenure_months} Months` : `${contract.tenor_days || 90} Days`}</span></div>
+                  <div className="row"><span>Direct Payee</span><span className="val">{contract.supplier || contract.supplier_name} (Supplier Escrow)</span></div>
+                  <div className="row"><span>Repayment Source</span><span className="val">{contract.buyer || contract.buyer_name} (Buyer Escrow)</span></div>
+                  <div className="row"><span>Diversion Risk Rating</span><span className="val">0.00% (Direct Non-Cash Rail)</span></div>
+
+                  <div style={{margin: '1.2rem 0 0.4rem 0', color: '#94a3b8', fontSize: '11px', fontWeight: 600}}>
+                    Milestone Disbursement Tranches ({(contract.milestones || []).length})
+                  </div>
+                  {(contract.milestones || []).map((m, idx) => (
+                    <div key={idx} className="milestone">
+                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <span style={{fontWeight: 700, color: '#fff'}}>{m.stage || m.name} ({m.pct}%)</span>
+                        <span style={{color: '#fff', fontWeight: 700}}>₹{Number(m.amount).toLocaleString()}</span>
+                      </div>
+                      <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '0.3rem'}}>{m.condition}</div>
+                      <div style={{fontSize: '10px', color: '#64748b', marginTop: '0.2rem'}}>Target: {m.target || m.disbursement_rail}</div>
+                    </div>
+                  ))}
+
+                  <div style={{marginTop: '1.2rem', background: '#0a0d13', padding: '0.8rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)'}}>
+                    <div style={{fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase'}}>Lender Term Customization</div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.4rem'}}>
+                      <div>
+                        <label style={{fontSize: '10px', color: '#94a3b8'}}>Interest Rate (%)</label>
+                        <input type="number" step="0.25" value={customRate} onChange={e => setCustomRate(e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={{fontSize: '10px', color: '#94a3b8'}}>Tenor (Days)</label>
+                        <input type="number" value={customTenor} onChange={e => setCustomTenor(e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{color: '#64748b', fontStyle: 'italic', padding: '2rem 0'}}>
+                  Contract not compiled for {selectedOpp}. Click "Compile Contract" above.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DemoSection onUpdate={() => load(selectedOpp)} currentOppId={selectedOpp} />
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
