@@ -1,0 +1,6 @@
+{
+  "name": "Conduit",
+  "description": "Autonomous MSME credit operating system for Karnataka kirana merchants, tailors, and handloom weavers — featuring conversational Kannada voice loan applications, 1-tap Account Aggregator verification, Digital Financial Passport, and daily UPI Autopay micro-sweeps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
