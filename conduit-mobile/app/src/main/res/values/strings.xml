@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Conduit</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_voice_apply">Voice Loan</string>
+    <string name="nav_passport">Passport</string>
+    <string name="nav_repayment">Repay</string>
+
+    <!-- Language Toggle -->
+    <string name="language_toggle_label">ಕನ್ನಡ</string>
+    <string name="language_toggle_cd">Switch app language between Kannada and English</string>
+
+    <!-- Home Screen -->
+    <string name="home_greeting_primary">Welcome Ravi</string>
+    <string name="home_business_subtitle">Hubballi Provision Store • Hubballi</string>
+    <string name="home_verified_merchant_badge">UPI Verified Merchant</string>
+    <string name="home_solvency_title">Credit Health Score</string>
+    <string name="home_solvency_tier">Prime Tier</string>
+    <string name="home_solvency_out_of">of 900</string>
+    <string name="home_solvency_caption">Based on 12 months of steady PhonePe &amp; GPay sales</string>
+    <string name="home_preapproved_limit">Pre-approved limit: ₹1,00,000</string>
+    <string name="home_stat_daily_upi_label">Daily UPI Turnover</string>
+    <string name="home_stat_daily_upi_value">₹6,200</string>
+    <string name="home_stat_consistency_label">Turnover Consistency</string>
+    <string name="home_stat_consistency_value">98.2%</string>
+    <string name="home_stat_saved_label">Total Interest Saved</string>
+    <string name="home_stat_saved_value">₹17,400</string>
+    <string name="home_hero_festival_tag">FESTIVAL WORKING CAPITAL</string>
+    <string name="home_hero_title">Need Festival Working Capital?</string>
+    <string name="home_hero_subtitle">Tap &amp; speak in Kannada to get funds in 2 hours at 13.2% APR.</string>
+    <string name="home_hero_cta">Speak in Kannada</string>
+    <string name="home_active_loan_title">Active Loan Repayment</string>
+    <string name="home_active_loan_autopay_badge">UPI Autopay Active</string>
+    <string name="home_active_loan_daily_sweep">₹220 / day • Auto-deducted at 9:00 PM</string>
+    <string name="home_active_loan_progress_format">₹%1$s repaid of ₹%2$s</string>
+    <string name="home_active_loan_days_left">%1$d days remaining</string>
+    <string name="home_view_tracker_cta">View Tracker</string>
+    <string name="home_quick_passport_title">Sovereign Financial Passport</string>
+    <string name="home_quick_passport_subtitle">Share verified UPI credit proof with banks &amp; wholesalers</string>
+
+    <!-- Voice Apply Screen -->
+    <string name="voice_screen_title">Voice Loan Application</string>
+    <string name="voice_screen_subtitle">No forms. Just speak naturally in Kannada, Hindi, or English.</string>
+    <string name="voice_step_speak">1. Speak</string>
+    <string name="voice_step_verify">2. 1-Tap Verify</string>
+    <string name="voice_step_disburse">3. Get Funds</string>
+    <string name="voice_mic_idle_hint">Tap the microphone and tell us how much working capital you need</string>
+    <string name="voice_mic_sample_prompt">Try saying: “I need ₹50,000 for Diwali grocery stock for 3 months.”</string>
+    <string name="voice_mic_recording_hint">Listening in Kannada… Tap to finish speaking</string>
+    <string name="voice_mic_transcribing_hint">Translating via Groq AI (English • Hindi • Kannada)…</string>
+    <string name="voice_mic_button_cd">Voice loan microphone button</string>
+    <string name="voice_mic_tap_to_speak">Tap to Speak</string>
+    <string name="voice_mic_tap_to_stop">Tap to Finish</string>
+    <string name="voice_transcription_title">What You Said</string>
+    <string name="voice_detected_kannada">Detected: Kannada (ಕನ್ನಡ)</string>
+    <string name="voice_original_speech_label">Kannada Speech</string>
+    <string name="voice_english_translation_label">English Translation</string>
+    <string name="voice_extracted_terms_title">Auto-Extracted Loan Terms</string>
+    <string name="voice_term_amount_label">Amount</string>
+    <string name="voice_term_tenure_label">Tenure</string>
+    <string name="voice_term_daily_label">Daily Repayment</string>
+    <string name="voice_term_purpose_label">Business Purpose</string>
+    <string name="voice_term_days_format">%1$d Days</string>
+    <string name="voice_proceed_aa_cta">1-Tap Verify Sales via RBI AA</string>
+    <string name="voice_record_again_cta">Speak Again</string>
+
+    <!-- Account Aggregator Modal -->
+    <string name="aa_modal_badge">RBI Regulated • Sahamati AA</string>
+    <string name="aa_modal_title">Verify UPI Sales in 1 Tap</string>
+    <string name="aa_modal_description">One tap to verify your PhonePe/GooglePay turnover securely via Sahamati AA. No bank visits. Zero paperwork.</string>
+    <string name="aa_modal_handle_label">Account Aggregator Handle</string>
+    <string name="aa_modal_otp_label">Auto-read 6-digit Sahamati OTP</string>
+    <string name="aa_modal_privacy_note">Read-only 12-month UPI summary. Your bank PIN is never asked or stored.</string>
+    <string name="aa_modal_approve_cta">Approve &amp; Check Eligibility</string>
+    <string name="aa_modal_cancel_cta">Not Now</string>
+
+    <!-- Underwriting Progress -->
+    <string name="underwriting_title">Preparing Your Best Bank Offer</string>
+    <string name="underwriting_subtitle">Usually completes in under 10 seconds</string>
+    <string name="underwriting_step_1">Checking daily UPI cash-flow consistency…</string>
+    <string name="underwriting_step_2">Matching lowest-interest prime bank partners…</string>
+    <string name="underwriting_step_3">Securing your verified Merchant Credit Passport…</string>
+    <string name="underwriting_step_done">Verified</string>
+
+    <!-- Approved Offer Sheet -->
+    <string name="offer_approved_badge">APPROVED • INSTANT DISBURSAL</string>
+    <string name="offer_approved_title">₹%1$s Ready for Your Shop!</string>
+    <string name="offer_approved_subtitle">Transfer directly to Hubballi Provision Store bank account via UPI in under 2 hours.</string>
+    <string name="offer_rate_label">Prime Interest Rate</string>
+    <string name="offer_rate_value">%1$s%% APR</string>
+    <string name="offer_daily_sweep_label">Easy Daily UPI Sweep</string>
+    <string name="offer_daily_sweep_value">₹%1$s / day</string>
+    <string name="offer_savings_callout">You save ₹17,400 compared to 48% local meter vaddi moneylenders!</string>
+    <string name="offer_disburse_cta">Disburse to Bank Account via UPI</string>
+    <string name="offer_disbursed_title">Funds Initiated via UPI!</string>
+    <string name="offer_disbursed_subtitle">₹%1$s is on its way to %2$s. Your first ₹%3$s daily micro-sweep starts tomorrow at 9:00 PM.</string>
+    <string name="offer_go_to_repayment_cta">Open Daily Repayment Tracker</string>
+    <string name="offer_apply_new_cta">Start New Voice Request</string>
+    <string name="voice_error_retry">Try Again</string>
+
+    <!-- Digital Twin Screen -->
+    <string name="passport_title">Merchant Financial Passport</string>
+    <string name="passport_subtitle">Your verified business strength that formal banks can trust immediately</string>
+    <string name="passport_verified_status">Active &amp; Tamper-Proof</string>
+    <string name="passport_merchant_meta">Hubballi • Kirana &amp; Provisions • UPI ID: ravi.hubballi@okaxis</string>
+    <string name="passport_chart_title">12-Month UPI Inflow Stability</string>
+    <string name="passport_chart_subtitle">Monthly verified sales (₹ in thousands)</string>
+    <string name="passport_chart_peak_tag">Peak Festival Demand</string>
+    <string name="passport_chart_avg_label">Monthly Avg: ₹1.86L</string>
+    <string name="passport_festival_title">Seasonal Festival Surge Readiness</string>
+    <string name="passport_festival_diwali">Diwali Stock Boost: +42% projected UPI sales</string>
+    <string name="passport_festival_ugadi">Ugadi &amp; Dasara Track Record: 100% on-time restock turnover</string>
+    <string name="passport_festival_badge">Pre-Qualified for Festival Top-Up</string>
+    <string name="passport_social_title">Community Trust &amp; Social Collateral</string>
+    <string name="passport_social_org">Sanjeevini NRLM Self-Help Network &amp; Hubballi Kirana Association</string>
+    <string name="passport_social_score">98% Unblemished Record</string>
+    <string name="passport_social_desc">Endorsed by 14 local merchants and 3 wholesale distributors with zero missed trade payments.</string>
+    <string name="passport_qr_title">Verifiable Credit Proof QR</string>
+    <string name="passport_qr_subtitle">Let any bank or wholesale supplier scan to verify your 785 Prime Tier score without seeing your private bank statements.</string>
+    <string name="passport_qr_hash_label">Proof Reference</string>
+    <string name="passport_share_cta">Share Credit Proof</string>
+    <string name="passport_shared_toast">Verified credit passport proof copied for sharing</string>
+
+    <!-- Repayment Screen -->
+    <string name="repayment_title">Daily Micro-Sweep Tracker</string>
+    <string name="repayment_subtitle">Stress-free ₹220/day UPI Autopay aligned with evening shop closing</string>
+    <string name="repayment_repaid_format">₹%1$s repaid of ₹%2$s</string>
+    <string name="repayment_remaining_label">Remaining Balance</string>
+    <string name="repayment_days_left_label">Days Left</string>
+    <string name="repayment_today_status">₹%1$s paid today via automated UPI Autopay at 9:00 PM.</string>
+    <string name="repayment_simulate_cta">Record Today’s ₹220 UPI Sweep</string>
+    <string name="repayment_simulate_done_cta">Daily Sweep Recorded!</string>
+    <string name="repayment_comparison_title">Freedom from Moneylenders</string>
+    <string name="repayment_comparison_subtitle">How much you keep in your family pocket vs. street meter vaddi</string>
+    <string name="repayment_moneylender_label">Street Moneylender Cost (48% APR)</string>
+    <string name="repayment_moneylender_value">₹72,000</string>
+    <string name="repayment_conduit_label">Conduit Prime Bank Cost (13.2% APR)</string>
+    <string name="repayment_conduit_value">₹51,650</string>
+    <string name="repayment_saved_banner">You have saved ₹%1$s in interest!</string>
+    <string name="repayment_history_title">Recent Daily UPI Sweeps</string>
+    <string name="repayment_download_cta">Download No-Due &amp; CIBIL Upgrade Report</string>
+    <string name="repayment_download_success">CIBIL Credit Upgrade Report &amp; Payment Receipt ready!</string>
+    <string name="repayment_cibil_boost_note">Every on-time ₹220 sweep builds your formal CIBIL credit history.</string>
+</resources>
