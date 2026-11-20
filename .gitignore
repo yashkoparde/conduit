@@ -1,0 +1,17 @@
+# Root .gitignore for Conduit
+
+# Dependencies and build caches
+.gradle/
+.kotlin/
+build/
+**/build/
+node_modules/
+
+# Local configuration and secrets
+.env
+local.properties
+debug.keystore
+*.iml
+.idea/
+.DS_Store
+Thumbs.db
