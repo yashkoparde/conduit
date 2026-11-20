@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONDUIT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #08090c;
+      --text: #f1f3f7;
+      --muted: #717d91;
+      --accent: #00e599;
+      --border: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(12, 15, 22, 0.88);
+      --mono: 'JetBrains Mono', monospace;
+      --display: 'Space Grotesk', -apple-system, sans-serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      height: 100%;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fixed Canvas Background */
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+      background: #08090c;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: contrast(1.1) brightness(0.75);
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(8, 9, 12, 0.25) 0%, rgba(8, 9, 12, 0.88) 85%);
+    }
+
+    /* Clean Navbar */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1.6rem 2.8rem;
+      display: flex;
+      align-items: center;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .brand {
+      font-family: var(--display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      pointer-events: auto;
+    }
+
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    /* Scroll Track */
+    .scroll-track {
+      position: relative;
+      width: 100%;
+      height: 600vh;
+      z-index: 10;
+    }
+
+    .viewport {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      padding: 2rem;
+      overflow: hidden;
+    }
+
+    /* Stage 1 */
+    .stage-problem {
+      position: absolute;
+      max-width: 680px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      will-change: opacity, transform;
+    }
+
+    .title-problem {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .subtitle-problem {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 520px;
+      margin: 0 auto 2rem;
+    }
+
+    .problem-stats {
+      display: inline-flex;
+      gap: 2rem;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      padding: 0.8rem 1.8rem;
+      border-radius: 8px;
+    }
+
+    .stat-num {
+      font-family: var(--mono);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Stage 2 */
+    .stage-hero {
+      position: absolute;
+      max-width: 800px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      will-change: opacity, transform;
+    }
+
+    .title-hero {
+      font-family: var(--display);
+      font-size: clamp(4.2rem, 12vw, 9rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 1.2rem;
+    }
+
+    .headline-hero {
+      font-family: var(--display);
+      font-size: clamp(1.2rem, 2.2vw, 1.9rem);
+      font-weight: 600;
+      line-height: 1.3;
+      color: #e2e8f0;
+      margin-bottom: 0.8rem;
+    }
+
+    .headline-hero span {
+      color: var(--accent);
+    }
+
+    .desc-hero {
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* Stage 3: The 7 Elements - Circular Orbital Ecosystem Layout */
+    .stage-ecosystem {
+      position: absolute;
+      width: 100%;
+      max-width: 1180px;
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1rem;
+    }
+
+    .eco-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .eco-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .eco-title {
+      font-family: var(--display);
+      font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .eco-subtitle {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: #64748b;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .eco-meta {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: #94a3b8;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eco-meta span {
+      color: var(--accent);
+    }
+
+    /* Orbital Stage Container */
+    .eco-orbital-wrapper {
+      position: relative;
+      width: min(720px, 94vw);
+      height: min(720px, 94vw);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Subtle Orbital Track Rings (Monochrome/Graphite - No multi-color slop) */
+    .eco-orbit-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .eco-orbit-ring.outer-orbit {
+      width: calc(100% - 100px);
+      height: calc(100% - 100px);
+    }
+
+    .eco-orbit-ring.mid-orbit {
+      width: calc(100% - 240px);
+      height: calc(100% - 240px);
+      border-style: dotted;
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Central Hub Core */
+    .eco-hub {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #111726 0%, #080c14 90%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      z-index: 10;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(0, 0, 0, 0.8);
+      pointer-events: auto;
+    }
+
+    .eco-hub-tag {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 0.2rem;
+    }
+
+    .eco-hub-name {
+      font-family: var(--display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #fff;
+    }
+
+    .eco-hub-desc {
+      font-size: 0.62rem;
+      color: #94a3b8;
+      line-height: 1.25;
+      margin-top: 0.25rem;
+    }
+
+    .eco-hub-pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 229, 153, 0.2);
+      pointer-events: none;
+    }
+
+    /* Circular Placed Nodes */
+    .eco-node {
+      position: absolute;
+      width: 190px;
+      transform: translate(-50%, -50%);
+      background: #0d121c;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.8rem 0.9rem;
+      text-decoration: none;
+      color: inherit;
+      pointer-events: auto;
+      transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      z-index: 20;
+    }
+
+    .eco-node:hover {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: #131a29;
+      transform: translate(-50%, -50%) scale(1.03);
+    }
+
+    .eco-node.core-foundation {
+      border-color: rgba(0, 229, 153, 0.25);
+      background: #0b151e;
+    }
+
+    .eco-node.core-foundation:hover {
+      border-color: rgba(0, 229, 153, 0.6);
+      background: #0f1d2a;
+    }
+
+    .eco-node-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.3rem;
+    }
+
+    .eco-node-id {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    .eco-node-role {
+      font-family: var(--mono);
+      font-size: 0.55rem;
+      color: #64748b;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eco-node-title {
+      font-family: var(--display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.2;
+      margin-bottom: 0.25rem;
+    }
+
+    .eco-node-desc {
+      font-size: 0.67rem;
+      color: #94a3b8;
+      line-height: 1.3;
+      font-weight: 400;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .eco-node-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.45rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .eco-node-tech {
+      font-family: var(--mono);
+      font-size: 0.55rem;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+    }
+
+    .eco-node-link {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: #64748b;
+      transition: color 0.2s;
+    }
+
+    .eco-node:hover .eco-node-link {
+      color: var(--accent);
+    }
+
+    /* Polar Coordinate Positions on 720px Box */
+    /* Center = 50%, Radius R = 285px */
+    /* 7 elements evenly spaced: 360 / 7 = 51.43 deg */
+    /* 01: Top (90 deg / -90 from standard) -> 50%, 10.5% */
+    .node-pos-1 { top: 10.5%; left: 50%; }
+    /* 02: 51.4 deg clock -> top: 20.8%, left: 81.3% */
+    .node-pos-2 { top: 20.8%; left: 81.3%; }
+    /* 03: 102.8 deg clock -> top: 58.7%, left: 88.6% */
+    .node-pos-3 { top: 58.7%; left: 88.6%; }
+    /* 04: 154.3 deg clock -> top: 88.2%, left: 67.2% */
+    .node-pos-4 { top: 88.2%; left: 67.2%; }
+    /* 05: 205.7 deg clock -> top: 88.2%, left: 32.8% */
+    .node-pos-5 { top: 88.2%; left: 32.8%; }
+    /* 06: 257.1 deg clock -> top: 58.7%, left: 11.4% */
+    .node-pos-6 { top: 58.7%; left: 11.4%; }
+    /* 07: 308.6 deg clock -> top: 20.8%; left: 18.7% */
+    .node-pos-7 { top: 20.8%; left: 18.7%; }
+
+    /* Responsive adjustments for circular diagram */
+    @media (max-width: 820px) {
+      .eco-orbital-wrapper {
+        display: none;
+      }
+      .stage-ecosystem {
+        position: relative;
+        overflow-y: auto;
+        max-height: 85vh;
+        padding-bottom: 2.5rem;
+      }
+      .eco-mobile-list {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        width: 100%;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      .eco-mobile-list .eco-node {
+        position: static;
+        width: 100%;
+        transform: none;
+      }
+    }
+
+    .eco-mobile-list {
+      display: none;
+    }
+
+    /* Minimal Scroll Cue */
+    .cue {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      z-index: 50;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Sequence Canvas -->
+  <div id="canvas-container">
+    <canvas id="sequence-canvas"></canvas>
+  </div>
+  <div class="vignette"></div>
+
+  <!-- Minimal Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span>CONDUIT</span>
+    </div>
+  </header>
+
+  <!-- Scroll Cue -->
+  <div class="cue" id="scrollCue">SCROLL TO SCRUB</div>
+
+  <!-- Scroll Track -->
+  <main class="scroll-track" id="scrollTrack">
+    <div class="viewport">
+
+      <!-- ==============================================
+           STAGE 1: THE PROBLEM (Frames 00 - 14)
+           ============================================== -->
+      <section class="stage-problem" id="stageProblem">
+        <h1 class="title-problem">Credit-invisible MSMEs lose demand every day.</h1>
+        <p class="subtitle-problem">
+          Traditional banks wait for audited paperwork. Without collateral, genuine business opportunities go unfunded.
+        </p>
+        <div class="problem-stats">
+          <div>
+            <div class="stat-num">53%</div>
+            <div class="stat-label">Credit Rejection</div>
+          </div>
+          <div>
+            <div class="stat-num">₹25T+</div>
+            <div class="stat-label">Unserved Demand</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           STAGE 2: CONDUIT (Frames 15 - 23)
+           ============================================== -->
+      <section class="stage-hero" id="stageHero">
+        <div class="title-hero">CONDUIT</div>
+        <h2 class="headline-hero">
+          Scale <span>MSMEs</span>. Verify <span>Lenders</span>.
+        </h2>
+        <p class="desc-hero">
+          Transforming applicant-based banking into opportunity-based borrower discovery.
+        </p>
+      </section>
+
+      <!-- ==============================================
+           STAGE 3: THE 7 ELEMENTS (Frames 24 - 29)
+           Circular Orbital Ecosystem Layout
+           ============================================== -->
+      <section class="stage-ecosystem" id="stageEcosystem">
+        <div class="eco-header">
+          <div class="eco-header-left">
+            <div class="eco-title">Conduit Platform Ecosystem</div>
+            <div class="eco-subtitle">Orbital Architecture &bull; 5 Workflow Nodes + 2 Graph Engines</div>
+          </div>
+          <div class="eco-meta">
+            Runtime Status: <span>Active Mesh</span> &bull; 7 Services
+          </div>
+        </div>
+
+        <!-- Desktop Circular Orbital System -->
+        <div class="eco-orbital-wrapper">
+          <!-- Orbital Track Rings -->
+          <div class="eco-orbit-ring outer-orbit"></div>
+          <div class="eco-orbit-ring mid-orbit"></div>
+
+          <!-- Central Hub: Conduit Core Router -->
+          <div class="eco-hub">
+            <div class="eco-hub-pulse"></div>
+            <span class="eco-hub-tag">Core Gateway</span>
+            <div class="eco-hub-name">CONDUIT</div>
+            <p class="eco-hub-desc">Opportunity Routing & Graph Consensus</p>
+          </div>
+
+          <!-- Node 01: Top (50%, 10.5%) -->
+          <a href="./apps/msme-app/index.html" class="eco-node node-pos-1">
+            <div class="eco-node-top">
+              <span class="eco-node-id">01</span>
+              <span class="eco-node-role">Client Ingest</span>
+            </div>
+            <div class="eco-node-title">MSME Mobile App</div>
+            <p class="eco-node-desc">Captures shop-floor capacity and invoice flows directly from producers.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Telemetry / PWA</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <!-- Node 02: 51.4° (81.3%, 20.8%) -->
+          <a href="./apps/demand-verification/index.html" class="eco-node node-pos-2">
+            <div class="eco-node-top">
+              <span class="eco-node-id">02</span>
+              <span class="eco-node-role">Audit Proof</span>
+            </div>
+            <div class="eco-node-title">Demand Verification</div>
+            <p class="eco-node-desc">Cross-validates counterparty activity and delivery receipts without paper.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Consensus Engine</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <!-- Node 03: 102.8° (88.6%, 58.7%) -->
+          <a href="./apps/demand-detector/index.html" class="eco-node node-pos-3">
+            <div class="eco-node-top">
+              <span class="eco-node-id">03</span>
+              <span class="eco-node-role">Pattern Detection</span>
+            </div>
+            <div class="eco-node-title">Demand Detector</div>
+            <p class="eco-node-desc">Surfaces unserved purchase orders and working capital bottlenecks.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Market Heuristics</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <!-- Node 04: 154.3° (67.2%, 88.2%) -->
+          <a href="./apps/capital-simulator/index.html" class="eco-node node-pos-4">
+            <div class="eco-node-top">
+              <span class="eco-node-id">04</span>
+              <span class="eco-node-role">Risk Modeling</span>
+            </div>
+            <div class="eco-node-title">Capital Simulator</div>
+            <p class="eco-node-desc">Simulates throughput gains and repayment safety margins before loan release.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Monte Carlo / ROI</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <!-- Node 05: 205.7° (32.8%, 88.2%) -->
+          <a href="./apps/loan-designer/index.html" class="eco-node node-pos-5">
+            <div class="eco-node-top">
+              <span class="eco-node-id">05</span>
+              <span class="eco-node-role">Disbursement</span>
+            </div>
+            <div class="eco-node-title">Loan Designer</div>
+            <p class="eco-node-desc">Structures milestone-based credit lines tied straight to verified vendors.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Smart Tranches</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <!-- Node 06: 257.1° (11.4%, 58.7%) - Core Foundation -->
+          <a href="./apps/gap-engine/index.html" class="eco-node core-foundation node-pos-6">
+            <div class="eco-node-top">
+              <span class="eco-node-id">06 CORE</span>
+              <span class="eco-node-role">Analytics Layer</span>
+            </div>
+            <div class="eco-node-title">Gap Intelligence</div>
+            <p class="eco-node-desc">Matches dormant manufacturing lines with buyer order surges in real time.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Matching Kernel</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <!-- Node 07: 308.6° (18.7%, 20.8%) - Core Foundation -->
+          <a href="./apps/unmet-graph/index.html" class="eco-node core-foundation node-pos-7">
+            <div class="eco-node-top">
+              <span class="eco-node-id">07 CORE</span>
+              <span class="eco-node-role">Network Mesh</span>
+            </div>
+            <div class="eco-node-title">Unmet Economy Graph</div>
+            <p class="eco-node-desc">Topological network map indexing supply chains and borrower credit vectors.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Knowledge Graph</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Mobile / Narrow Screen Fallback List -->
+        <div class="eco-mobile-list">
+          <a href="./apps/msme-app/index.html" class="eco-node">
+            <div class="eco-node-top">
+              <span class="eco-node-id">01</span>
+              <span class="eco-node-role">Client Ingest</span>
+            </div>
+            <div class="eco-node-title">MSME Mobile App</div>
+            <p class="eco-node-desc">Captures shop-floor capacity and invoice flows directly from producers.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Telemetry / PWA</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <a href="./apps/demand-verification/index.html" class="eco-node">
+            <div class="eco-node-top">
+              <span class="eco-node-id">02</span>
+              <span class="eco-node-role">Audit Proof</span>
+            </div>
+            <div class="eco-node-title">Demand Verification</div>
+            <p class="eco-node-desc">Cross-validates counterparty activity and delivery receipts without paper.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Consensus Engine</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <a href="./apps/demand-detector/index.html" class="eco-node">
+            <div class="eco-node-top">
+              <span class="eco-node-id">03</span>
+              <span class="eco-node-role">Pattern Detection</span>
+            </div>
+            <div class="eco-node-title">Demand Detector</div>
+            <p class="eco-node-desc">Surfaces unserved purchase orders and working capital bottlenecks.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Market Heuristics</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <a href="./apps/capital-simulator/index.html" class="eco-node">
+            <div class="eco-node-top">
+              <span class="eco-node-id">04</span>
+              <span class="eco-node-role">Risk Modeling</span>
+            </div>
+            <div class="eco-node-title">Capital Simulator</div>
+            <p class="eco-node-desc">Simulates throughput gains and repayment safety margins before loan release.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Monte Carlo / ROI</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <a href="./apps/loan-designer/index.html" class="eco-node">
+            <div class="eco-node-top">
+              <span class="eco-node-id">05</span>
+              <span class="eco-node-role">Disbursement</span>
+            </div>
+            <div class="eco-node-title">Loan Designer</div>
+            <p class="eco-node-desc">Structures milestone-based credit lines tied straight to verified vendors.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Smart Tranches</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <a href="./apps/gap-engine/index.html" class="eco-node core-foundation">
+            <div class="eco-node-top">
+              <span class="eco-node-id">06 // CORE</span>
+              <span class="eco-node-role">Analytics Layer</span>
+            </div>
+            <div class="eco-node-title">Gap Intelligence</div>
+            <p class="eco-node-desc">Matches dormant manufacturing lines with buyer order surges in real time.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Matching Kernel</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+
+          <a href="./apps/unmet-graph/index.html" class="eco-node core-foundation">
+            <div class="eco-node-top">
+              <span class="eco-node-id">07 // CORE</span>
+              <span class="eco-node-role">Network Mesh</span>
+            </div>
+            <div class="eco-node-title">Unmet Economy Graph</div>
+            <p class="eco-node-desc">Topological network map indexing supply chains and borrower credit vectors.</p>
+            <div class="eco-node-foot">
+              <span class="eco-node-tech">Knowledge Graph</span>
+              <span class="eco-node-link">OPEN &rarr;</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    const FRAME_COUNT = 30; // 0 to 29
+    const STAGE_1_MAX = 14; // F00 - F14: The Problem
+    const STAGE_2_MAX = 23; // F15 - F23: CONDUIT
+    const STAGE_3_MIN = 24; // F24 - F29: 7 Elements
+
+    const canvas = document.getElementById('sequence-canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    const scrollCue = document.getElementById('scrollCue');
+    const stageProblem = document.getElementById('stageProblem');
+    const stageHero = document.getElementById('stageHero');
+    const stageEcosystem = document.getElementById('stageEcosystem');
+
+    const images = [];
+    let loadedCount = 0;
+    let currentFrameIndex = 0;
+    let targetFrameIndex = 0;
+
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+      renderFrame(Math.round(currentFrameIndex));
+    }
+
+    function renderFrame(index) {
+      const img = images[index];
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+
+      const cw = window.innerWidth;
+      const ch = window.innerHeight;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+
+      const canvasRatio = cw / ch;
+      const imageRatio = iw / ih;
+
+      let drawW, drawH, offsetX, offsetY;
+      if (imageRatio > canvasRatio) {
+        drawH = ch;
+        drawW = ch * imageRatio;
+        offsetX = (cw - drawW) / 2;
+        offsetY = 0;
+      } else {
+        drawW = cw;
+        drawH = cw / imageRatio;
+        offsetX = 0;
+        offsetY = (ch - drawH) / 2;
+      }
+
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+    }
+
+    function preloadImages() {
+      for (let i = 0; i < FRAME_COUNT; i++) {
+        const img = new Image();
+        img.src = `./sequence/frame_${pad(i)}_delay-0.1s.gif`;
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === 1) renderFrame(0);
+        };
+        images.push(img);
+      }
+    }
+
+    function updateOnScroll() {
+      const track = document.getElementById('scrollTrack');
+      const rect = track.getBoundingClientRect();
+      const trackHeight = track.offsetHeight - window.innerHeight;
+      const scrolled = -rect.top;
+
+      let progress = scrolled / trackHeight;
+      progress = Math.max(0, Math.min(1, progress));
+
+      targetFrameIndex = progress * (FRAME_COUNT - 1);
+      const cur = Math.round(targetFrameIndex);
+
+      if (progress > 0.03) scrollCue.style.opacity = '0';
+      else scrollCue.style.opacity = '1';
+
+      // Stage 1: The Problem (F00 - F14)
+      if (cur <= STAGE_1_MAX) {
+        const p1 = cur / STAGE_1_MAX;
+
+        let op = 1;
+        if (p1 < 0.2) op = p1 / 0.2;
+        else if (p1 > 0.8) op = (1 - p1) / 0.2;
+
+        stageProblem.style.opacity = op;
+        stageProblem.style.transform = `translateY(${-p1 * 20}px)`;
+
+        stageHero.style.opacity = '0';
+        stageEcosystem.style.opacity = '0';
+        stageEcosystem.style.pointerEvents = 'none';
+      }
+      // Stage 2: Hero CONDUIT (F15 - F23)
+      else if (cur < STAGE_3_MIN) {
+        stageProblem.style.opacity = '0';
+
+        const p2 = (cur - (STAGE_1_MAX + 1)) / (STAGE_2_MAX - (STAGE_1_MAX + 1));
+        let op = 1;
+        if (p2 < 0.25) op = p2 / 0.25;
+        else if (p2 > 0.85) op = (1 - p2) / 0.15;
+
+        stageHero.style.opacity = op;
+        stageHero.style.transform = `translateY(${(1 - Math.min(1, p2 * 1.5)) * 25}px)`;
+
+        stageEcosystem.style.opacity = '0';
+        stageEcosystem.style.pointerEvents = 'none';
+      }
+      // Stage 3: The 7 Elements (F24 - F29)
+      else {
+        stageProblem.style.opacity = '0';
+        stageHero.style.opacity = '0';
+
+        const p3 = (cur - STAGE_3_MIN) / (FRAME_COUNT - 1 - STAGE_3_MIN);
+        const enterT = Math.min(1, p3 * 2.2);
+
+        stageEcosystem.style.opacity = enterT;
+        stageEcosystem.style.pointerEvents = enterT > 0.6 ? 'auto' : 'none';
+        stageEcosystem.style.transform = `translateY(${(1 - enterT) * 25}px)`;
+      }
+    }
+
+    // Smooth LERP
+    let lastRenderedFrame = -1;
+    function animate() {
+      currentFrameIndex += (targetFrameIndex - currentFrameIndex) * 0.18;
+      const rounded = Math.min(FRAME_COUNT - 1, Math.max(0, Math.round(currentFrameIndex)));
+      if (rounded !== lastRenderedFrame) {
+        renderFrame(rounded);
+        lastRenderedFrame = rounded;
+      }
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('scroll', updateOnScroll, { passive: true });
+
+    preloadImages();
+    resizeCanvas();
+    animate();
+  </script>
+</body>
+</html>
