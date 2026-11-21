@@ -65,8 +65,15 @@ class GapEngineService {
             $b = $d ? current(array_filter($buyers, fn($x) => $x['id'] === $d['buyer_id'])) : null;
 
             if ($m && $d && $b) {
+                $demandUnits = (int)$opp['demanded_units'];
+                $unitPrice = (float)$d['unit_target_price'];
+                $totalContractVal = $demandUnits * $unitPrice;
+                $financingReq = (float)$opp['estimated_financing_required'];
+                $gdpImpact = round($totalContractVal * 1.75, 2);
+
                 $triads[] = [
                     'opportunity_id' => $opp['id'],
+                    'triad_id' => $opp['id'],
                     'buyer' => [
                         'id' => $b['id'],
                         'name' => $b['name'],
@@ -75,15 +82,25 @@ class GapEngineService {
                     'msme' => [
                         'id' => $m['id'],
                         'name' => $m['business_name'],
-                        'industry' => $m['industry']
+                        'industry' => $m['industry'],
+                        'idle_capacity' => (int)$m['max_monthly_capacity'] - (int)$m['current_production']
                     ],
                     'supplier' => [
                         'id' => $s ? $s['id'] : 'TBD',
                         'name' => $s ? $s['name'] : 'Pending Allocation',
-                        'material' => $s ? $s['material_type'] : 'Raw Materials'
+                        'material' => $s ? $s['material_type'] : 'Raw Materials',
+                        'unit_price' => $s ? (float)$s['unit_price'] : 320.0
                     ],
-                    'demand_units' => (int)$opp['demanded_units'],
-                    'financing_required' => (float)$opp['estimated_financing_required'],
+                    'demand' => [
+                        'item' => $d['item_description'],
+                        'units' => $demandUnits,
+                        'unit_target_price' => $unitPrice,
+                        'total_value' => $totalContractVal
+                    ],
+                    'demand_units' => $demandUnits,
+                    'financing_required' => $financingReq,
+                    'unlocked_capital_required' => $financingReq,
+                    'projected_gdp_impact' => $gdpImpact,
                     'status' => $opp['status'],
                     'consensus_score' => (float)$opp['consensus_score'],
                     'economic_synergy_index' => round(75 + ((float)$opp['consensus_score'] * 24), 1)
