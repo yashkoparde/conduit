@@ -3,37 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONDUIT — Unfulfilled Demand Detector</title>
+  <title>CONDUIT — Demand Detector</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel" src="../demo-panel.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
-    a { color: #f8fafc; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,0.4); }
-    a:hover { border-bottom-color: #fff; }
-    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
-    .title-nav { font-size: 13px; font-weight: 600; color: #94a3b8; }
-    .title-nav strong { color: #fff; }
-    .stats { display: flex; gap: 2.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.08); padding: 0.9rem 1.2rem; background: #11141c; border-radius: 4px; flex-wrap: wrap; }
-    .stat-val { color: #fff; font-weight: 700; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-    @media(max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 4px; margin-bottom: 1rem; }
-    .card.opportunity { border-left: 3px solid #38bdf8; background: #121722; }
-    .btn { background: #f8fafc; color: #090a0d; border: 1px solid #fff; padding: 0.5rem 1rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+    a { color: #94a3b8; text-decoration: none; }
+    a:hover { color: #fff; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
+    .stats { display: flex; gap: 2rem; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.08); padding: 0.8rem 1rem; background: #11141c; border-radius: 4px; font-size: 12px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media(max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 4px; margin-bottom: 0.8rem; }
+    .card.opportunity { border-left: 2px solid #38bdf8; }
+    .btn { background: #fff; color: #090a0d; border: none; padding: 0.45rem 0.85rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
     .btn:hover { background: #e2e8f0; }
     .btn-secondary { background: transparent; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); }
-    .btn-secondary:hover { background: rgba(255,255,255,0.06); color: #fff; }
-    input, select { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.45rem; border-radius: 2px; width: 100%; margin-top: 0.2rem; margin-bottom: 0.6rem; }
-    label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-panel { background: #0e121a; border: 1px solid rgba(255,255,255,0.12); padding: 1.2rem; border-radius: 4px; margin-bottom: 1.5rem; }
-    .row { display: flex; justify-content: space-between; padding: 0.35rem 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .pill { font-size: 10px; padding: 0.2rem 0.5rem; border-radius: 2px; background: rgba(255,255,255,0.08); color: #fff; font-weight: 600; }
+    .row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .val { color: #fff; font-weight: 600; }
+    input, select { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.4rem; border-radius: 2px; width: 100%; margin: 0.2rem 0 0.5rem 0; }
+    label { font-size: 10px; color: #94a3b8; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -42,24 +36,62 @@
   <script type="text/babel">
     const API = 'http://127.0.0.1:8088';
 
+    function DemoSection({ onUpdate, currentOppId }) {
+      const [open, setOpen] = React.useState(false);
+      const [step, setStep] = React.useState(1);
+      const [audit, setAudit] = React.useState(null);
+
+      const runStep = (s) => {
+        fetch(`${API}/api/demo/execute-step?step=${s}&opportunity_id=${currentOppId}`)
+          .then(r => r.json())
+          .then(res => {
+            setStep(s);
+            setAudit(res.audit);
+            if (onUpdate) onUpdate();
+          });
+      };
+
+      return (
+        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
+          {!open ? (
+            <button onClick={() => setOpen(true)} className="btn" style={{ padding: '0.5rem 0.9rem', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }}></span>
+              Demo Steps
+            </button>
+          ) : (
+            <div style={{ width: '320px', background: '#0d1017', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', padding: '1rem', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Demo</span>
+                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '14px' }}>&times;</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.3rem', marginBottom: '0.8rem' }}>
+                {[1, 2, 3, 4].map(n => (
+                  <button key={n} onClick={() => runStep(n)} style={{ background: step === n ? '#1e293b' : '#11141c', color: step === n ? '#fff' : '#64748b', border: '1px solid rgba(255,255,255,0.08)', padding: '0.35rem 0', borderRadius: '2px', cursor: 'pointer', fontSize: '10px' }}>
+                    S{n}
+                  </button>
+                ))}
+              </div>
+              {audit && (
+                <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <span>Score: <strong style={{ color: '#fff' }}>{audit.score}</strong></span>
+                    <span>Consensus: <strong style={{ color: '#fff' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
+                  </div>
+                  <div style={{ color: '#94a3b8', fontSize: '10px' }}>{audit.lender_verdict}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     function App() {
       const [feed, setFeed] = React.useState(null);
-      const [showOrderForm, setShowOrderForm] = React.useState(false);
-      const [showMsmeForm, setShowMsmeForm] = React.useState(false);
-
-      // Order Form state
-      const [buyerId, setBuyerId] = React.useState('BUYER-01');
-      const [itemDesc, setItemDesc] = React.useState('Specialty Cotton Workwear Overalls');
-      const [unitsDemanded, setUnitsDemanded] = React.useState(400);
-      const [targetPrice, setTargetPrice] = React.useState(850);
-
-      // MSME Form state
-      const [msmeName, setMsmeName] = React.useState('Kashi Precision Engineering Works');
-      const [industry, setIndustry] = React.useState('Apparel & Garments');
-      const [location, setLocation] = React.useState('Varanasi, UP');
-      const [maxCap, setMaxCap] = React.useState(1200);
-      const [currProd, setCurrProd] = React.useState(450);
-      const [bottleneck, setBottleneck] = React.useState('RAW_MATERIALS');
+      const [showAddOrder, setShowAddOrder] = React.useState(false);
+      const [itemDesc, setItemDesc] = React.useState('Cotton Twill Shirts');
+      const [units, setUnits] = React.useState(350);
+      const [price, setPrice] = React.useState(750);
 
       const load = () => {
         fetch(`${API}/api/demand-detector/feed`)
@@ -78,217 +110,114 @@
         fetch(`${API}/api/demand-orders/create`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            buyer_id: buyerId,
-            item_description: itemDesc,
-            units_demanded: Number(unitsDemanded),
-            unit_target_price: Number(targetPrice)
-          })
-        }).then(r => r.json()).then(res => {
-          if (res.success) {
-            setShowOrderForm(false);
-            load();
-          } else {
-            alert(res.error || 'Failed to submit order');
-          }
+          body: JSON.stringify({ buyer_id: 'BUYER-01', item_description: itemDesc, units_demanded: Number(units), unit_target_price: Number(price) })
+        }).then(() => {
+          setShowAddOrder(false);
+          load();
         });
       };
 
-      const submitMsme = (e) => {
-        e.preventDefault();
-        fetch(`${API}/api/msmes/create`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            business_name: msmeName,
-            industry: industry,
-            location: location,
-            max_monthly_capacity: Number(maxCap),
-            current_production: Number(currProd),
-            capital_bottleneck: bottleneck
-          })
-        }).then(r => r.json()).then(res => {
-          if (res.success) {
-            setShowMsmeForm(false);
-            load();
-          } else {
-            alert(res.error || 'Failed to register MSME');
-          }
-        });
-      };
-
-      if (!feed) return <div style={{padding: '2rem'}}>Running Demand Detector...</div>;
+      if (!feed) return <div style={{padding: '2rem'}}>Loading...</div>;
 
       const s = feed.stats;
+      const opps = feed.opportunities || [];
       const orders = feed.orders || [];
       const msmes = feed.msmes || [];
-      const opps = feed.opportunities || [];
 
       return (
         <div>
           <div className="top">
-            <div className="title-nav">
-              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong>Unfulfilled Demand Detector</strong>
+            <div>
+              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>Unfulfilled Demand Detector</strong>
             </div>
-            <div style={{display: 'flex', gap: '0.6rem'}}>
-              <button className="btn btn-secondary" onClick={() => setShowOrderForm(!showOrderForm)}>+ Add Buyer Order</button>
-              <button className="btn btn-secondary" onClick={() => setShowMsmeForm(!showMsmeForm)}>+ Add MSME Capacity</button>
-              <button className="btn" onClick={runScan}>Run Matching</button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn btn-secondary" onClick={() => setShowAddOrder(!showAddOrder)}>+ Add Order</button>
+              <button className="btn" onClick={runScan}>Match</button>
             </div>
           </div>
 
-          {/* Stats Bar */}
+          {/* Minimal Stats */}
           <div className="stats">
-            <div>Demand Orders: <span className="stat-val">{s.demand_units.toLocaleString()} units</span></div>
-            <div>MSME Idle Capacity: <span className="stat-val">{s.idle_capacity_units.toLocaleString()} units</span></div>
-            <div>Matched Opportunities: <span className="stat-val">{s.opportunity_count}</span></div>
-            <div>Total Capital Gap: <span className="stat-val">₹{s.capital_required_inr.toLocaleString()}</span></div>
+            <div>Demanded: <span className="val">{s.demand_units} units</span></div>
+            <div>Idle Capacity: <span className="val">{s.idle_capacity_units} units</span></div>
+            <div>Matches: <span className="val">{s.opportunity_count}</span></div>
+            <div>Capital Gap: <span className="val">₹{s.capital_required_inr.toLocaleString()}</span></div>
           </div>
 
-          {/* New Order Form */}
-          {showOrderForm && (
-            <div className="form-panel">
-              <strong style={{color: '#fff'}}>Register New Buyer Purchase Order</strong>
-              <form onSubmit={submitOrder} style={{marginTop: '0.8rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', alignItems: 'end'}}>
-                <div>
-                  <label>Institutional Buyer</label>
-                  <select value={buyerId} onChange={e => setBuyerId(e.target.value)}>
-                    <option value="BUYER-01">Apollo Care Health Network (Healthcare)</option>
-                    <option value="BUYER-02">Bharat Infra Works (Infrastructure)</option>
-                    <option value="BUYER-03">Kashi Educational Trust (Institution)</option>
-                  </select>
-                </div>
+          {showAddOrder && (
+            <div className="card" style={{ marginBottom: '1.2rem', padding: '1rem' }}>
+              <form onSubmit={submitOrder} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.8rem', alignItems: 'end' }}>
                 <div>
                   <label>Item Description</label>
                   <input type="text" value={itemDesc} onChange={e => setItemDesc(e.target.value)} required />
                 </div>
                 <div>
-                  <label>Units Demanded</label>
-                  <input type="number" value={unitsDemanded} onChange={e => setUnitsDemanded(e.target.value)} required />
+                  <label>Units</label>
+                  <input type="number" value={units} onChange={e => setUnits(e.target.value)} required />
                 </div>
                 <div>
-                  <label>Target Price (INR)</label>
-                  <input type="number" value={targetPrice} onChange={e => setTargetPrice(e.target.value)} required />
+                  <label>Price (₹)</label>
+                  <input type="number" value={price} onChange={e => setPrice(e.target.value)} required />
                 </div>
-                <div style={{gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem'}}>
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowOrderForm(false)}>Cancel</button>
-                  <button type="submit" className="btn">Save Order</button>
+                <div>
+                  <button type="submit" className="btn" style={{ marginBottom: '0.5rem' }}>Save</button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* New MSME Form */}
-          {showMsmeForm && (
-            <div className="form-panel">
-              <strong style={{color: '#fff'}}>Register MSME Production Capacity</strong>
-              <form onSubmit={submitMsme} style={{marginTop: '0.8rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', alignItems: 'end'}}>
-                <div>
-                  <label>Enterprise Name</label>
-                  <input type="text" value={msmeName} onChange={e => setMsmeName(e.target.value)} required />
-                </div>
-                <div>
-                  <label>Industry</label>
-                  <select value={industry} onChange={e => setIndustry(e.target.value)}>
-                    <option value="Apparel & Garments">Apparel & Garments</option>
-                    <option value="Light Engineering & Auto Components">Light Engineering & Auto Components</option>
-                    <option value="Food Processing & Packaging">Food Processing & Packaging</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Cluster / Location</label>
-                  <input type="text" value={location} onChange={e => setLocation(e.target.value)} required />
-                </div>
-                <div>
-                  <label>Max Monthly Capacity (Units)</label>
-                  <input type="number" value={maxCap} onChange={e => setMaxCap(e.target.value)} required />
-                </div>
-                <div>
-                  <label>Current Production (Units)</label>
-                  <input type="number" value={currProd} onChange={e => setCurrProd(e.target.value)} required />
-                </div>
-                <div>
-                  <label>Primary Capital Bottleneck</label>
-                  <select value={bottleneck} onChange={e => setBottleneck(e.target.value)}>
-                    <option value="RAW_MATERIALS">Raw Materials Working Capital</option>
-                    <option value="MACHINERY">Tooling &amp; Equipment Headroom</option>
-                    <option value="COLD_STORAGE">Cold Storage Preservation</option>
-                  </select>
-                </div>
-                <div style={{gridColumn: 'span 3', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem'}}>
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowMsmeForm(false)}>Cancel</button>
-                  <button type="submit" className="btn">Register MSME</button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* Opportunities Synthesized List */}
-          <div style={{marginBottom: '0.8rem', color: '#94a3b8', fontWeight: 600}}>
-            Detected Demand-to-Capacity Opportunities ({opps.length})
+          {/* Matches List */}
+          <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.6rem' }}>
+            Detected Opportunities ({opps.length})
           </div>
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem', marginBottom: '2rem'}}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.8rem', marginBottom: '1.5rem' }}>
             {opps.map(o => (
               <div key={o.id} className="card opportunity">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
-                  <span className="pill">{o.id}</span>
-                  <span style={{color: '#fff', fontWeight: 600, fontSize: '11px'}}>{o.status}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontWeight: 700, color: '#fff' }}>{o.item_description}</span>
+                  <span style={{ fontSize: '10px', color: '#38bdf8' }}>{o.id}</span>
                 </div>
-                <div style={{fontWeight: 700, color: '#fff', fontSize: '15px', margin: '0.5rem 0'}}>{o.item_description}</div>
-                <div style={{color: '#94a3b8', fontSize: '11px', marginBottom: '0.8rem'}}>
-                  Producer: <strong style={{color: '#fff'}}>{o.business_name}</strong> ({o.location})
-                </div>
-                <div className="row"><span>Order Quantity</span><span className="val">{o.demanded_units} units</span></div>
-                <div className="row"><span>Idle Equipment Headroom</span><span className="val">{o.idle_capacity} units</span></div>
-                <div className="row"><span>Contract Target Price</span><span className="val">₹{Number(o.unit_target_price).toLocaleString()}</span></div>
-                <div className="row"><span>Est. Financing Required</span><span className="val">₹{Number(o.estimated_financing_required).toLocaleString()}</span></div>
-                <div style={{marginTop: '0.8rem', display: 'flex', gap: '0.6rem'}}>
-                  <a href={`/apps/demand-verification/index.html`} className="btn" style={{fontSize: '10px'}}>Verify Proofs &rarr;</a>
-                  <a href={`/apps/loan-designer/index.html`} className="btn btn-secondary" style={{fontSize: '10px'}}>Credit Score &rarr;</a>
+                <div style={{ color: '#94a3b8', fontSize: '11px', margin: '0.2rem 0 0.5rem 0' }}>{o.business_name} ({o.location})</div>
+                <div className="row"><span>Demanded / Idle</span><span className="val">{o.demanded_units} / {o.idle_capacity} units</span></div>
+                <div className="row"><span>Capital Gap</span><span className="val">₹{Number(o.estimated_financing_required).toLocaleString()}</span></div>
+                <div style={{ marginTop: '0.6rem', display: 'flex', gap: '0.5rem' }}>
+                  <a href="/apps/demand-verification/index.html" className="btn" style={{ fontSize: '10px' }}>Verify Proofs</a>
+                  <a href="/apps/loan-designer/index.html" className="btn btn-secondary" style={{ fontSize: '10px' }}>Loan Terms</a>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Database Feed: Orders vs MSME capacity */}
+          {/* Raw Order vs MSME Feed */}
           <div className="grid">
             <div>
-              <div style={{color: '#94a3b8', marginBottom: '0.6rem', fontWeight: 600}}>Verified Demand Orders ({orders.length})</div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>Demand Orders ({orders.length})</div>
               {orders.map(o => (
-                <div key={o.id} className="card">
-                  <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <span style={{fontWeight: 600, color: '#fff'}}>{o.item_description}</span>
-                    <span className="pill">{o.units_demanded} units</span>
+                <div key={o.id} className="card" style={{ padding: '0.8rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 600 }}>
+                    <span>{o.item_description}</span>
+                    <span>{o.units_demanded} u</span>
                   </div>
-                  <div style={{color: '#94a3b8', fontSize: '11px', margin: '0.3rem 0'}}>Buyer: {o.buyer_name} &nbsp;&bull;&nbsp; Deadline: {o.delivery_deadline}</div>
-                  <div className="row"><span>Unit Target Price</span><span className="val">₹{Number(o.unit_target_price).toLocaleString()}</span></div>
-                  <div className="row"><span>Total Demand Volume</span><span className="val">₹{(o.units_demanded * o.unit_target_price).toLocaleString()}</span></div>
+                  <div style={{ color: '#94a3b8', fontSize: '11px' }}>{o.buyer_name} &nbsp;&bull;&nbsp; ₹{o.unit_target_price}</div>
                 </div>
               ))}
             </div>
 
             <div>
-              <div style={{color: '#94a3b8', marginBottom: '0.6rem', fontWeight: 600}}>Registered MSMEs &amp; Headroom ({msmes.length})</div>
-              {msmes.map(m => {
-                const idle = m.max_monthly_capacity - m.current_production;
-                const util = Math.round((m.current_production / m.max_monthly_capacity) * 100);
-                return (
-                  <div key={m.id} className="card">
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                      <span style={{fontWeight: 600, color: '#fff'}}>{m.business_name}</span>
-                      <span style={{color: '#fff', fontWeight: 600}}>{util}% Utilized</span>
-                    </div>
-                    <div style={{color: '#94a3b8', fontSize: '11px', margin: '0.3rem 0'}}>{m.industry} &nbsp;&bull;&nbsp; {m.location}</div>
-                    <div className="row"><span>Capacity (Max / Current)</span><span className="val">{m.max_monthly_capacity} / {m.current_production}</span></div>
-                    <div className="row"><span>Idle Equipment Headroom</span><span className="val">{idle} units</span></div>
-                    <div className="row"><span>Diagnosed Bottleneck</span><span className="val">{m.capital_bottleneck}</span></div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>Producers ({msmes.length})</div>
+              {msmes.map(m => (
+                <div key={m.id} className="card" style={{ padding: '0.8rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 600 }}>
+                    <span>{m.business_name}</span>
+                    <span>{m.max_monthly_capacity - m.current_production} idle</span>
                   </div>
-                );
-              })}
+                  <div style={{ color: '#94a3b8', fontSize: '11px' }}>{m.industry} &nbsp;&bull;&nbsp; {m.location}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <DemoSection onUpdate={() => load()} currentOppId="OPP-9001" />
+          <DemoSection onUpdate={load} currentOppId="OPP-9001" />
         </div>
       );
     }

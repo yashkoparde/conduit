@@ -76,8 +76,8 @@ if ($uri === '/' && (!isset($_SERVER['HTTP_ACCEPT']) || str_contains($_SERVER['H
       <div class="grid">
         <div class="card">
           <div class="tag">ELEMENT 01 // INTERFACE</div>
-          <div style="font-weight: 600; color: #fff; margin: 0.3rem 0;"><a href="/apps/msme-app/index.html">MSME Mobile Application &rarr;</a></div>
-          <div style="color: #94a3b8; font-size: 12px;">Capacity &amp; shift profiling</div>
+          <div style="font-weight: 600; color: #fff; margin: 0.3rem 0;"><a href="https://drive.google.com/file/d/16rJE79SLMwtV-MM_NJ8Hl3HsGc0R6iZR/view?usp=drive_link" target="_blank" rel="noopener noreferrer">MSME Mobile Application &rarr;</a></div>
+          <div style="color: #94a3b8; font-size: 12px;">Capacity &amp; shift profiling (Drive APK)</div>
         </div>
 
         <div class="card">

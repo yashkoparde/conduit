@@ -10,25 +10,21 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel" src="../demo-panel.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
-    a { color: #f8fafc; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,0.4); }
-    a:hover { border-bottom-color: #fff; }
-    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
-    .title-nav { font-size: 13px; font-weight: 600; color: #94a3b8; }
-    .title-nav strong { color: #fff; }
+    a { color: #94a3b8; text-decoration: none; }
+    a:hover { color: #fff; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
+    .stats { display: flex; gap: 2.5rem; background: #11141c; padding: 0.9rem 1.2rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; margin-bottom: 1.5rem; font-size: 12px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    @media(max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 4px; margin-bottom: 1rem; }
+    @media(max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1.1rem; border-radius: 4px; margin-bottom: 0.8rem; }
     .row { display: flex; justify-content: space-between; padding: 0.35rem 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .val { color: #fff; font-weight: 600; }
-    .chain { background: #0e121a; border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 4px; margin-bottom: 0.8rem; }
-    .formula-banner { background: #0d1118; border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 12px; }
-    .meter { height: 4px; background: #1e2638; margin: 0.5rem 0; border-radius: 2px; overflow: hidden; }
+    .meter { height: 4px; background: #1e2638; margin: 0.5rem 0 0.8rem 0; border-radius: 2px; overflow: hidden; }
     .fill { height: 100%; background: #38bdf8; }
-    select { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.3rem; border-radius: 2px; }
+    .btn { background: #fff; color: #090a0d; border: none; padding: 0.45rem 0.85rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
   </style>
 </head>
 <body>
@@ -37,9 +33,58 @@
   <script type="text/babel">
     const API = 'http://127.0.0.1:8088';
 
+    function DemoSection({ onUpdate, currentOppId }) {
+      const [open, setOpen] = React.useState(false);
+      const [step, setStep] = React.useState(1);
+      const [audit, setAudit] = React.useState(null);
+
+      const runStep = (s) => {
+        fetch(`${API}/api/demo/execute-step?step=${s}&opportunity_id=${currentOppId}`)
+          .then(r => r.json())
+          .then(res => {
+            setStep(s);
+            setAudit(res.audit);
+            if (onUpdate) onUpdate();
+          });
+      };
+
+      return (
+        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
+          {!open ? (
+            <button onClick={() => setOpen(true)} className="btn" style={{ padding: '0.5rem 0.9rem', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }}></span>
+              Demo Steps
+            </button>
+          ) : (
+            <div style={{ width: '320px', background: '#0d1017', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', padding: '1rem', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Demo</span>
+                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '14px' }}>&times;</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.3rem', marginBottom: '0.8rem' }}>
+                {[1, 2, 3, 4].map(n => (
+                  <button key={n} onClick={() => runStep(n)} style={{ background: step === n ? '#1e293b' : '#11141c', color: step === n ? '#fff' : '#64748b', border: '1px solid rgba(255,255,255,0.08)', padding: '0.35rem 0', borderRadius: '2px', cursor: 'pointer', fontSize: '10px' }}>
+                    S{n}
+                  </button>
+                ))}
+              </div>
+              {audit && (
+                <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <span>Score: <strong style={{ color: '#fff' }}>{audit.score}</strong></span>
+                    <span>Consensus: <strong style={{ color: '#fff' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
+                  </div>
+                  <div style={{ color: '#94a3b8', fontSize: '10px' }}>{audit.lender_verdict}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     function App() {
       const [res, setRes] = React.useState(null);
-      const [filter, setFilter] = React.useState('ALL');
 
       const load = () => {
         fetch(`${API}/api/gap-engine/analyze`).then(r => r.json()).then(d => setRes(d.data));
@@ -47,114 +92,71 @@
 
       React.useEffect(load, []);
 
-      if (!res) return <div style={{padding: '2rem'}}>Computing Economic Diagnostics...</div>;
+      if (!res) return <div style={{padding: '2rem'}}>Loading...</div>;
 
       const m = res.summary_metrics;
       const c = res.producer_clusters || [];
       const t = res.economic_triads || [];
 
-      const filteredTriads = filter === 'ALL' ? t : t.filter(x => x.msme.industry === filter);
-
       return (
         <div>
           <div className="top">
-            <div className="title-nav">
-              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong>Gap Intelligence Engine</strong>
+            <div>
+              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>Gap Intelligence Engine</strong>
             </div>
-            <div>Status: <span style={{color: '#fff', fontWeight: 700}}>{res.engine_status}</span></div>
+            <div style={{ color: '#94a3b8', fontSize: '12px' }}>Status: <strong style={{ color: '#fff' }}>Online</strong></div>
           </div>
 
-          {/* Macro Aggregate Metrics */}
-          <div style={{display: 'flex', gap: '2.5rem', background: '#11141c', padding: '1rem 1.4rem', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px', marginBottom: '1.5rem', flexWrap: 'wrap'}}>
-            <div>Clusters Analyzed: <span className="val">{m.total_analyzed_clusters}</span></div>
-            <div>Active Economic Triads: <span className="val">{m.active_economic_triads}</span></div>
+          {/* Minimal Metrics Strip */}
+          <div className="stats">
+            <div>Clusters: <span className="val">{m.total_analyzed_clusters}</span></div>
+            <div>Active Triads: <span className="val">{m.active_economic_triads}</span></div>
             <div>Capital Blocked: <span className="val">₹{m.total_capital_blocked_inr.toLocaleString()}</span></div>
-            <div>Potential GDP Impact: <span className="val">₹{m.total_potential_gdp_unlock_inr.toLocaleString()}</span></div>
-          </div>
-
-          {/* Mathematical Diagnostics */}
-          <div className="formula-banner">
-            <strong style={{color: '#fff'}}>Economic Capacity Formulation &amp; Macro Impact Model:</strong>
-            <div style={{marginTop: '0.4rem', color: '#cbd5e1'}}>
-              Capacity Utilization: U = Current Output / Rated Capacity. Current Cluster Average: <strong>48.2%</strong>.<br/>
-              Projected Economic Expansion: ΔGDP = Order Value × 1.75 (Direct + Secondary Supply Chain Unlock).
-            </div>
+            <div>Potential GDP Expansion: <span className="val">₹{m.total_potential_gdp_unlock_inr.toLocaleString()}</span></div>
           </div>
 
           <div className="grid">
-            {/* Left: Producer Cluster Utilization */}
+            {/* Producer Headroom */}
             <div>
-              <div style={{color: '#94a3b8', marginBottom: '0.6rem', fontSize: '11px', fontWeight: 600}}>Producer Capacity Utilization &amp; Headroom</div>
-              {c.map(p => {
-                const utilPct = parseFloat(p.utilization_rate);
-                return (
-                  <div key={p.msme_id} className="card">
-                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
-                      <span style={{color: '#fff', fontWeight: 700, fontSize: '14px'}}>{p.business_name}</span>
-                      <span style={{color: '#fff', fontWeight: 700}}>{p.utilization_rate} Utilized</span>
-                    </div>
-                    <div style={{color: '#94a3b8', fontSize: '11px', margin: '0.2rem 0'}}>{p.industry} &nbsp;&bull;&nbsp; {p.location}</div>
-                    
-                    <div className="meter"><div className="fill" style={{width: p.utilization_rate}}></div></div>
-
-                    <div className="row"><span>Monthly Capacity (Rated)</span><span className="val">{p.max_monthly_capacity} units</span></div>
-                    <div className="row"><span>Active Production</span><span className="val">{p.current_production} units</span></div>
-                    <div className="row"><span>Unused Factory Headroom</span><span className="val">{p.idle_capacity} units</span></div>
-                    <div className="row"><span>Diagnosed Bottleneck</span><span className="val">{p.capital_bottleneck}</span></div>
-                    <div className="row"><span>Capacity Assessment</span><span className="val">{p.status}</span></div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.6rem' }}>Producer Utilization</div>
+              {c.map(p => (
+                <div key={p.msme_id} className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontWeight: 700, color: '#fff' }}>{p.business_name}</span>
+                    <span style={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}>{p.utilization_rate}</span>
                   </div>
-                );
-              })}
+                  <div style={{ color: '#94a3b8', fontSize: '11px', margin: '0.2rem 0' }}>{p.industry} &nbsp;&bull;&nbsp; {p.location}</div>
+                  
+                  <div className="meter"><div className="fill" style={{ width: p.utilization_rate }}></div></div>
+
+                  <div className="row"><span>Capacity (Max / Current)</span><span className="val">{p.max_monthly_capacity} / {p.current_production}</span></div>
+                  <div className="row"><span>Idle Equipment Headroom</span><span className="val">{p.idle_capacity} units</span></div>
+                  <div className="row"><span>Bottleneck</span><span className="val">{p.capital_bottleneck}</span></div>
+                </div>
+              ))}
             </div>
 
-            {/* Right: Active Economic Triads */}
+            {/* Economic Triads */}
             <div>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem'}}>
-                <div style={{color: '#94a3b8', fontSize: '11px', fontWeight: 600}}>Active Economic Triads ({filteredTriads.length})</div>
-                <div style={{fontSize: '11px', color: '#94a3b8'}}>
-                  Industry Filter: 
-                  <select value={filter} onChange={e => setFilter(e.target.value)} style={{marginLeft: '0.4rem'}}>
-                    <option value="ALL">All Sectors</option>
-                    <option value="Apparel & Garments">Apparel</option>
-                    <option value="Light Engineering & Auto Components">Engineering</option>
-                  </select>
-                </div>
-              </div>
-
-              {filteredTriads.map(t => (
-                <div key={t.triad_id} className="chain">
-                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.5rem', marginBottom: '0.6rem'}}>
-                    <span style={{fontWeight: 700, color: '#fff'}}>{t.triad_id}: {t.demand.item}</span>
-                    <span style={{color: '#fff', fontWeight: 600, fontSize: '11px'}}>Resolved</span>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.6rem' }}>Economic Triads ({t.length})</div>
+              {t.map(x => (
+                <div key={x.triad_id} className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>
+                    <span>{x.demand.item}</span>
+                    <span style={{ color: '#38bdf8', fontSize: '11px' }}>{x.triad_id}</span>
                   </div>
-
-                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', fontSize: '11px', margin: '0.5rem 0', background: '#121620', padding: '0.6rem', borderRadius: '2px'}}>
-                    <div>
-                      <div style={{color: '#94a3b8'}}>Buyer</div>
-                      <div style={{color: '#fff', fontWeight: 600}}>{t.buyer.name}</div>
-                      <div style={{color: '#94a3b8'}}>{t.demand.units} units</div>
-                    </div>
-                    <div>
-                      <div style={{color: '#94a3b8'}}>Producer</div>
-                      <div style={{color: '#fff', fontWeight: 600}}>{t.msme.name}</div>
-                      <div style={{color: '#fff'}}>{t.msme.idle_capacity} idle units</div>
-                    </div>
-                    <div>
-                      <div style={{color: '#94a3b8'}}>Supplier</div>
-                      <div style={{color: '#fff', fontWeight: 600}}>{t.supplier.name}</div>
-                      <div style={{color: '#94a3b8'}}>₹{t.supplier.unit_price}/unit</div>
-                    </div>
+                  <div style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '0.6rem' }}>
+                    {x.buyer.name} &rarr; {x.msme.name} &rarr; {x.supplier.name}
                   </div>
-
-                  <div className="row"><span>Gross Contract Value</span><span className="val">₹{t.demand.total_value.toLocaleString()}</span></div>
-                  <div className="row"><span>Capital Gap Unlocked</span><span className="val">₹{t.unlocked_capital_required.toLocaleString()}</span></div>
-                  <div className="row"><span>Projected Economic GDP Impact (1.75x)</span><span className="val">₹{t.projected_gdp_impact.toLocaleString()}</span></div>
+                  <div className="row"><span>Contract Value</span><span className="val">₹{x.demand.total_value.toLocaleString()}</span></div>
+                  <div className="row"><span>Capital Gap Unlocked</span><span className="val">₹{x.unlocked_capital_required.toLocaleString()}</span></div>
+                  <div className="row"><span>Projected Economic GDP Multiplier (1.75x)</span><span className="val">₹{x.projected_gdp_impact.toLocaleString()}</span></div>
                 </div>
               ))}
             </div>
           </div>
 
-          <DemoSection onUpdate={() => load()} currentOppId="OPP-9001" />
+          <DemoSection onUpdate={load} currentOppId="OPP-9001" />
         </div>
       );
     }
