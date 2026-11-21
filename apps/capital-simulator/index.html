@@ -3,29 +3,300 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONDUIT — Capital Simulator</title>
+  <title>CONDUIT — Capital Unlock Simulator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
-    a { color: #94a3b8; text-decoration: none; }
+    :root {
+      --bg: #07090e;
+      --card-bg: #0d111a;
+      --card-optimal: #111827;
+      --border: rgba(255, 255, 255, 0.08);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.15);
+      --green: #00e599;
+      --green-glow: rgba(0, 229, 153, 0.15);
+      --amber: #f59e0b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --display: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.07), transparent 70%),
+        radial-gradient(circle at 0% 100%, rgba(0, 229, 153, 0.03), transparent 50%);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 1.75rem 2.25rem;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
     a:hover { color: #fff; }
-    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
-    .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-    @media(max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
-    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between; }
-    .card.optimal { border-color: rgba(255,255,255,0.3); background: #131824; }
-    .row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-pill {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      letter-spacing: 0.08em;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .selector-label {
+      font-size: 11px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    select, input[type="number"] {
+      background: #090c13;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 0.45rem 0.65rem;
+      border-radius: 4px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    select:focus, input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+
+    /* Range slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: #192030;
+      border-radius: 3px;
+      outline: none;
+      margin: 0.6rem 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      transition: all 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1.1fr;
+      gap: 1.25rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.4rem;
+    }
+    @media(max-width: 1024px) { .controls-panel { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 600px) { .controls-panel { grid-template-columns: 1fr; } }
+
+    .control-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .control-label {
+      font-size: 10px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+    }
+    .control-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .control-sub {
+      font-size: 11px;
+      color: var(--dim);
+      margin-top: 0.25rem;
+    }
+
+    /* Mathematical Arbitrage Formula Box */
+    .formula-bar {
+      background: #090c14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.35rem;
+      margin-bottom: 1.4rem;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* 4 Comparative Modalities Grid */
+    .modalities-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.1rem;
+      margin-bottom: 1.4rem;
+    }
+    @media(max-width: 1150px) { .modalities-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 650px) { .modalities-grid { grid-template-columns: 1fr; } }
+
+    .modality-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .modality-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .modality-card.optimal {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: linear-gradient(180deg, #101625 0%, #0d121c 100%);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+    }
+    .modality-card.optimal::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--cyan);
+    }
+
+    .modality-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .optimal-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+    }
+
+    .modality-name {
+      font-family: var(--display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0.4rem 0 0.25rem 0;
+    }
+    .modality-desc {
+      color: var(--dim);
+      font-size: 11px;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 11px;
+    }
     .val { color: #fff; font-weight: 600; }
-    .btn { background: #fff; color: #090a0d; border: none; padding: 0.45rem 0.85rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-    input[type=range] { accent-color: #38bdf8; width: 100%; margin: 0.3rem 0; }
-    select { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.35rem; border-radius: 2px; }
+
+    .roi-strip {
+      margin-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .roi-number {
+      font-family: var(--display);
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Buttons */
+    .btn {
+      background: #fff;
+      color: #090a0d;
+      border: 1px solid #fff;
+      padding: 0.5rem 0.9rem;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover { background: #e2e8f0; }
+    .btn.btn-cyan {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      color: #07090e;
+    }
+    .btn.btn-cyan:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
   </style>
 </head>
 <body>
@@ -34,48 +305,70 @@
   <script type="text/babel">
     const API = 'http://127.0.0.1:8088';
 
+    // Interactive Demo Simulation Steps Floating Controller
     function DemoSection({ onUpdate, currentOppId }) {
       const [open, setOpen] = React.useState(false);
       const [step, setStep] = React.useState(1);
       const [audit, setAudit] = React.useState(null);
+      const [loading, setLoading] = React.useState(false);
 
       const runStep = (s) => {
+        setLoading(true);
         fetch(`${API}/api/demo/execute-step?step=${s}&opportunity_id=${currentOppId}`)
           .then(r => r.json())
           .then(res => {
+            setLoading(false);
             setStep(s);
             setAudit(res.audit);
             if (onUpdate) onUpdate();
-          });
+          })
+          .catch(() => setLoading(false));
       };
 
       return (
-        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
           {!open ? (
-            <button onClick={() => setOpen(true)} className="btn" style={{ padding: '0.5rem 0.9rem', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }}></span>
-              Demo Steps
+            <button 
+              onClick={() => setOpen(true)} 
+              className="btn btn-cyan" 
+              style={{ padding: '0.65rem 1.15rem', boxShadow: '0 6px 24px rgba(0,0,0,0.6)' }}
+            >
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#090a0d' }}></span>
+              Demo Simulation Steps
             </button>
           ) : (
-            <div style={{ width: '320px', background: '#0d1017', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', padding: '1rem', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Demo</span>
-                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '14px' }}>&times;</span>
+            <div style={{ width: '340px', background: '#0d111a', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '6px', padding: '1.1rem', boxShadow: '0 12px 40px rgba(0,0,0,0.85)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem' }}>
+                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Proof Stepper</span>
+                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '16px', lineHeight: 1 }}>&times;</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.3rem', marginBottom: '0.8rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem', marginBottom: '0.9rem' }}>
                 {[1, 2, 3, 4].map(n => (
-                  <button key={n} onClick={() => runStep(n)} style={{ background: step === n ? '#1e293b' : '#11141c', color: step === n ? '#fff' : '#64748b', border: '1px solid rgba(255,255,255,0.08)', padding: '0.35rem 0', borderRadius: '2px', cursor: 'pointer', fontSize: '10px' }}>
-                    S{n}
+                  <button 
+                    key={n} 
+                    onClick={() => runStep(n)} 
+                    style={{ 
+                      background: step === n ? '#1e293b' : '#090c13', 
+                      color: step === n ? '#fff' : '#64748b', 
+                      border: step === n ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.08)', 
+                      padding: '0.45rem 0', 
+                      borderRadius: '3px', 
+                      cursor: 'pointer', 
+                      fontSize: '11px',
+                      fontWeight: 700
+                    }}
+                  >
+                    Step {n}
                   </button>
                 ))}
               </div>
               {audit && (
-                <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                <div style={{ fontSize: '11px', color: '#cbd5e1', background: '#07090e', padding: '0.75rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
                     <span>Score: <strong style={{ color: '#fff' }}>{audit.score}</strong></span>
-                    <span>Consensus: <strong style={{ color: '#fff' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
+                    <span>Consensus: <strong style={{ color: 'var(--cyan)' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
                   </div>
-                  <div style={{ color: '#94a3b8', fontSize: '10px' }}>{audit.lender_verdict}</div>
+                  <div style={{ color: '#94a3b8', fontSize: '10px', marginTop: '0.3rem' }}>{audit.lender_verdict}</div>
                 </div>
               )}
             </div>
@@ -88,122 +381,257 @@
       const [data, setData] = React.useState(null);
       const [oppList, setOppList] = React.useState([]);
       const [selectedOpp, setSelectedOpp] = React.useState('OPP-9001');
-      const [units, setUnits] = React.useState(500);
 
-      const runCompute = (oppId, u) => {
+      // Custom parameters
+      const [units, setUnits] = React.useState(500);
+      const [sellingPrice, setSellingPrice] = React.useState(750);
+      const [rawCost, setRawCost] = React.useState(320);
+
+      const runCompute = (oppId, u, sp, rc) => {
         fetch(`${API}/api/simulator`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ opportunity_id: oppId, custom_parameters: { units: Number(u) } })
-        }).then(r => r.json()).then(res => {
-          if (res.success) setData(res.data);
-        });
+          body: JSON.stringify({
+            opportunity_id: oppId,
+            custom_parameters: {
+              units: Number(u),
+              selling_price: Number(sp),
+              raw_cost: Number(rc)
+            }
+          })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            setData(res.data);
+          }
+        })
+        .catch(err => console.error(err));
       };
 
       React.useEffect(() => {
-        fetch(`${API}/api/opportunities`).then(r => r.json()).then(res => setOppList(res.opportunities || []));
-        runCompute(selectedOpp, units);
+        fetch(`${API}/api/opportunities`)
+          .then(r => r.json())
+          .then(res => {
+            const list = res.opportunities || [];
+            setOppList(list);
+            const found = list.find(o => o.id === selectedOpp);
+            if (found) {
+              setUnits(found.units_demanded || 500);
+              setSellingPrice(found.unit_target_price || 750);
+              setRawCost(found.supplier_price || 320);
+              runCompute(selectedOpp, found.units_demanded || 500, found.unit_target_price || 750, found.supplier_price || 320);
+            } else {
+              runCompute(selectedOpp, units, sellingPrice, rawCost);
+            }
+          });
       }, [selectedOpp]);
 
-      if (!data) return <div style={{padding: '2rem'}}>Loading...</div>;
+      const onSelectChange = (oppId) => {
+        setSelectedOpp(oppId);
+        const match = oppList.find(o => o.id === oppId);
+        if (match) {
+          const u = match.units_demanded || 500;
+          const sp = match.unit_target_price || 750;
+          const rc = match.supplier_price || 320;
+          setUnits(u);
+          setSellingPrice(sp);
+          setRawCost(rc);
+          runCompute(oppId, u, sp, rc);
+        }
+      };
+
+      if (!data) return (
+        <div style={{ padding: '3rem', color: var(--muted), display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cyan)' }}></span>
+          Computing Capital Unlock Simulation...
+        </div>
+      );
 
       const res = data.results;
+      const inp = data.inputs;
+      const grossRevenue = units * sellingPrice;
+      const totalCapital = units * rawCost;
+      const netGain = grossRevenue - totalCapital;
+      const markupPct = rawCost > 0 ? Math.round(((sellingPrice - rawCost) / rawCost) * 100) : 0;
 
       return (
         <div>
-          <div className="top">
-            <div>
-              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>Capital Unlock Simulator</strong>
+          {/* Top Bar */}
+          <div className="top-bar">
+            <div className="brand-wrap">
+              <a href="../../index.html">&larr; Root Hub</a>
+              <span style={{ color: 'var(--dim)' }}>/</span>
+              <span className="brand-pill">ELEMENT 04</span>
+              <strong style={{ color: '#fff', fontSize: '13px' }}>Capital Unlock Simulator</strong>
             </div>
-            <div>
-              <select value={selectedOpp} onChange={e => { setSelectedOpp(e.target.value); runCompute(e.target.value, units); }}>
+
+            <div className="top-controls">
+              <span className="selector-label">Target Opportunity:</span>
+              <select 
+                value={selectedOpp} 
+                onChange={e => onSelectChange(e.target.value)}
+              >
                 {oppList.map(o => (
-                  <option key={o.id} value={o.id}>{o.id} ({o.msme_name})</option>
+                  <option key={o.id} value={o.id}>{o.id} — {o.msme_name} ({o.units_demanded} units)</option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Minimal Controls */}
-          <div className="controls">
-            <div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>Order Volume</div>
-              <input type="range" min="100" max="1500" step="25" value={units} onChange={e => { setUnits(e.target.value); runCompute(selectedOpp, e.target.value); }} />
-              <div className="val">{units} Units</div>
+          {/* Interactive Parameters Panel */}
+          <div className="controls-panel">
+            <div className="control-box">
+              <div className="control-label">Order Volume Slider</div>
+              <input 
+                type="range" 
+                min="100" 
+                max="1500" 
+                step="25" 
+                value={units} 
+                onChange={e => {
+                  setUnits(e.target.value);
+                  runCompute(selectedOpp, e.target.value, sellingPrice, rawCost);
+                }} 
+              />
+              <div className="control-value">{units} Units</div>
+              <div className="control-sub">Adjusts factory run size</div>
             </div>
-            <div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>Unit Contract Price</div>
-              <div className="val" style={{ marginTop: '0.4rem' }}>₹{data.inputs.selling_price} / unit</div>
+
+            <div className="control-box">
+              <div className="control-label">Unit Contract Price (INR)</div>
+              <input 
+                type="number" 
+                value={sellingPrice} 
+                onChange={e => {
+                  setSellingPrice(e.target.value);
+                  runCompute(selectedOpp, units, e.target.value, rawCost);
+                }} 
+              />
+              <div className="control-sub">Gross Rev: <strong style={{ color: '#fff' }}>₹{grossRevenue.toLocaleString()}</strong></div>
             </div>
-            <div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>Raw Material Cost</div>
-              <div className="val" style={{ marginTop: '0.4rem' }}>₹{data.inputs.raw_cost} / unit</div>
+
+            <div className="control-box">
+              <div className="control-label">Raw Material Unit Cost (INR)</div>
+              <input 
+                type="number" 
+                value={rawCost} 
+                onChange={e => {
+                  setRawCost(e.target.value);
+                  runCompute(selectedOpp, units, sellingPrice, e.target.value);
+                }} 
+              />
+              <div className="control-sub">Gross Unit Markup: <strong style={{ color: 'var(--cyan)' }}>{markupPct}%</strong></div>
+            </div>
+
+            <div className="control-box" style={{ background: '#090c13', padding: '0.75rem 1rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="control-label">Financing Required</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>₹{totalCapital.toLocaleString()}</div>
+              <div className="control-sub" style={{ color: 'var(--green)' }}>Net Spread: +₹{netGain.toLocaleString()}</div>
             </div>
           </div>
 
-          {/* 4 Clean Intervention Modalities */}
-          <div className="grid">
+          {/* Arbitrage Formula Box */}
+          <div className="formula-bar">
+            <strong style={{ color: '#fff' }}>Deterministic Arbitrage Physics:</strong><br />
+            Gross Output: <span style={{ color: '#fff' }}>R = {units} × ₹{sellingPrice} = ₹{grossRevenue.toLocaleString()}</span> &bull; 
+            Raw Capital Line: <span style={{ color: '#fff' }}>C_raw = {units} × ₹{rawCost} = ₹{totalCapital.toLocaleString()}</span><br />
+            Debt Coverage Spread: <span style={{ color: 'var(--cyan)' }}>DSCM = (R - C_raw) / C_raw = {rawCost > 0 ? (((sellingPrice - rawCost)/rawCost)*100).toFixed(1) : 0}% Projected Return</span>. 
+            Direct vendor payment minimizes cash leakage risk compared to standard commercial overdrafts.
+          </div>
+
+          {/* 4 Modalities Comparative Grid */}
+          <div style={{ color: 'var(--muted)', fontSize: '11px', marginBottom: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Comparative Intervention Modalities &amp; Mathematical Yields
+          </div>
+
+          <div className="modalities-grid">
             {/* Raw Material Escrow */}
-            <div className={`card ${res.raw_material_escrow.is_optimal ? 'optimal' : ''}`}>
+            <div className={`modality-card ${res.raw_material_escrow.is_optimal ? 'optimal' : ''}`}>
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>Raw Material Escrow</span>
-                  {res.raw_material_escrow.is_optimal && <span style={{ color: '#38bdf8', fontSize: '10px', fontWeight: 700 }}>Optimal</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="modality-tag">Intervention 01</span>
+                  {res.raw_material_escrow.is_optimal && <span className="optimal-badge">Optimal Strategy</span>}
                 </div>
-                <div className="row"><span>Capital</span><span className="val">₹{res.raw_material_escrow.capital_required_inr.toLocaleString()}</span></div>
-                <div className="row"><span>Revenue</span><span className="val">₹{res.raw_material_escrow.unlocked_revenue_inr.toLocaleString()}</span></div>
-                <div className="row"><span>Margin</span><span className="val">₹{res.raw_material_escrow.net_margin_inr.toLocaleString()}</span></div>
+                <div className="modality-name">Raw Material Escrow</div>
+                <div className="modality-desc">Supplier-direct tranche disbursement. Zero cash diversion.</div>
+
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.raw_material_escrow.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Unlocked Revenue</span><span className="val">₹{res.raw_material_escrow.unlocked_revenue_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Net Margin</span><span className="val" style={{ color: 'var(--green)' }}>₹{res.raw_material_escrow.net_margin_inr.toLocaleString()}</span></div>
               </div>
-              <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.6rem' }}>
-                <span style={{ fontSize: '10px', color: '#94a3b8' }}>ROI &nbsp;</span>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{res.raw_material_escrow.roi_percentage}%</span>
+
+              <div className="roi-strip">
+                <span className="control-label" style={{ margin: 0 }}>Computed ROI</span>
+                <span className="roi-number" style={{ color: 'var(--cyan)' }}>{res.raw_material_escrow.roi_percentage}%</span>
               </div>
             </div>
 
-            {/* Machinery Leasing */}
-            <div className={`card ${res.machinery_leasing.is_optimal ? 'optimal' : ''}`}>
+            {/* Equipment Tooling */}
+            <div className={`modality-card ${res.machinery_leasing.is_optimal ? 'optimal' : ''}`}>
               <div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.4rem' }}>Equipment Tooling</div>
-                <div className="row"><span>Capital</span><span className="val">₹{res.machinery_leasing.capital_required_inr.toLocaleString()}</span></div>
-                <div className="row"><span>Headroom</span><span className="val">{res.machinery_leasing.added_headroom_units} u</span></div>
-                <div className="row"><span>Margin</span><span className="val">₹{res.machinery_leasing.net_margin_inr.toLocaleString()}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="modality-tag">Intervention 02</span>
+                  {res.machinery_leasing.is_optimal && <span className="optimal-badge">Optimal Strategy</span>}
+                </div>
+                <div className="modality-name">Equipment Tooling</div>
+                <div className="modality-desc">Fixed asset lease for capacity-constrained tooling lines.</div>
+
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.machinery_leasing.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Added Headroom</span><span className="val">{res.machinery_leasing.added_headroom_units} Units</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.machinery_leasing.net_margin_inr.toLocaleString()}</span></div>
               </div>
-              <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.6rem' }}>
-                <span style={{ fontSize: '10px', color: '#94a3b8' }}>ROI &nbsp;</span>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{res.machinery_leasing.roi_percentage}%</span>
+
+              <div className="roi-strip">
+                <span className="control-label" style={{ margin: 0 }}>Computed ROI</span>
+                <span className="roi-number">{res.machinery_leasing.roi_percentage}%</span>
               </div>
             </div>
 
-            {/* Storage Upgrades */}
-            <div className={`card ${res.storage_upgrade.is_optimal ? 'optimal' : ''}`}>
+            {/* Cold Chain Storage */}
+            <div className={`modality-card ${res.storage_upgrade.is_optimal ? 'optimal' : ''}`}>
               <div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.4rem' }}>Cold Storage</div>
-                <div className="row"><span>Capital</span><span className="val">₹{res.storage_upgrade.capital_required_inr.toLocaleString()}</span></div>
-                <div className="row"><span>Saved</span><span className="val">{res.storage_upgrade.spoilage_saved_units} u</span></div>
-                <div className="row"><span>Margin</span><span className="val">₹{res.storage_upgrade.net_margin_inr.toLocaleString()}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="modality-tag">Intervention 03</span>
+                  {res.storage_upgrade.is_optimal && <span className="optimal-badge">Optimal Strategy</span>}
+                </div>
+                <div className="modality-name">Cold Chain Storage</div>
+                <div className="modality-desc">Preservation unit preventing ~18% corridor decay.</div>
+
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.storage_upgrade.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Spoilage Saved</span><span className="val">{res.storage_upgrade.spoilage_saved_units} Units</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.storage_upgrade.net_margin_inr.toLocaleString()}</span></div>
               </div>
-              <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.6rem' }}>
-                <span style={{ fontSize: '10px', color: '#94a3b8' }}>ROI &nbsp;</span>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{res.storage_upgrade.roi_percentage}%</span>
+
+              <div className="roi-strip">
+                <span className="control-label" style={{ margin: 0 }}>Computed ROI</span>
+                <span className="roi-number">{res.storage_upgrade.roi_percentage}%</span>
               </div>
             </div>
 
-            {/* Working Capital Line */}
-            <div className={`card ${res.working_capital_line.is_optimal ? 'optimal' : ''}`}>
+            {/* Revolving Cash Line */}
+            <div className={`modality-card ${res.working_capital_line.is_optimal ? 'optimal' : ''}`}>
               <div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.4rem' }}>Revolving Cash Line</div>
-                <div className="row"><span>Capital</span><span className="val">₹{res.working_capital_line.capital_required_inr.toLocaleString()}</span></div>
-                <div className="row"><span>Fulfilled</span><span className="val">{res.working_capital_line.fulfilled_units} u</span></div>
-                <div className="row"><span>Margin</span><span className="val">₹{res.working_capital_line.net_margin_inr.toLocaleString()}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="modality-tag">Intervention 04</span>
+                  {res.working_capital_line.is_optimal && <span className="optimal-badge">Optimal Strategy</span>}
+                </div>
+                <div className="modality-name">Revolving Cash Line</div>
+                <div className="modality-desc">Standard line with estimated 28% diversion risk.</div>
+
+                <div className="row"><span>Capital Required</span><span className="val">₹{res.working_capital_line.capital_required_inr.toLocaleString()}</span></div>
+                <div className="row"><span>Fulfilled Volume</span><span className="val">{res.working_capital_line.fulfilled_units} Units</span></div>
+                <div className="row"><span>Net Margin</span><span className="val">₹{res.working_capital_line.net_margin_inr.toLocaleString()}</span></div>
               </div>
-              <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.6rem' }}>
-                <span style={{ fontSize: '10px', color: '#94a3b8' }}>ROI &nbsp;</span>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{res.working_capital_line.roi_percentage}%</span>
+
+              <div className="roi-strip">
+                <span className="control-label" style={{ margin: 0 }}>Computed ROI</span>
+                <span className="roi-number">{res.working_capital_line.roi_percentage}%</span>
               </div>
             </div>
           </div>
 
-          <DemoSection onUpdate={() => runCompute(selectedOpp, units)} currentOppId={selectedOpp} />
+          <DemoSection onUpdate={() => runCompute(selectedOpp, units, sellingPrice, rawCost)} currentOppId={selectedOpp} />
         </div>
       );
     }

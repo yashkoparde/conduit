@@ -85,6 +85,7 @@
 
     function App() {
       const [res, setRes] = React.useState(null);
+      const [selectedOppId, setSelectedOppId] = React.useState('OPP-9001');
 
       const load = () => {
         fetch(`${API}/api/gap-engine/analyze`).then(r => r.json()).then(d => setRes(d.data));
@@ -104,7 +105,9 @@
             <div>
               <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>Gap Intelligence Engine</strong>
             </div>
-            <div style={{ color: '#94a3b8', fontSize: '12px' }}>Status: <strong style={{ color: '#fff' }}>Online</strong></div>
+            <div style={{ color: '#94a3b8', fontSize: '12px' }}>
+              Selected Triad: <strong style={{ color: '#38bdf8' }}>{selectedOppId}</strong> &bull; Status: <strong style={{ color: '#fff' }}>Online</strong>
+            </div>
           </div>
 
           {/* Minimal Metrics Strip */}
@@ -129,9 +132,9 @@
                   
                   <div className="meter"><div className="fill" style={{ width: p.utilization_rate }}></div></div>
 
-                  <div className="row"><span>Capacity (Max / Current)</span><span className="val">{p.max_monthly_capacity} / {p.current_production}</span></div>
+                  <div className="row"><span>Capacity (Max / Current)</span><span className="val">{p.max_capacity} / {p.current_production}</span></div>
                   <div className="row"><span>Idle Equipment Headroom</span><span className="val">{p.idle_capacity} units</span></div>
-                  <div className="row"><span>Bottleneck</span><span className="val">{p.capital_bottleneck}</span></div>
+                  <div className="row"><span>Bottleneck</span><span className="val">{p.bottleneck}</span></div>
                 </div>
               ))}
             </div>
@@ -140,7 +143,16 @@
             <div>
               <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.6rem' }}>Economic Triads ({t.length})</div>
               {t.map(x => (
-                <div key={x.triad_id} className="card">
+                <div 
+                  key={x.triad_id} 
+                  className="card" 
+                  onClick={() => setSelectedOppId(x.triad_id)}
+                  style={{ 
+                    cursor: 'pointer', 
+                    borderLeft: selectedOppId === x.triad_id ? '3px solid #38bdf8' : '1px solid rgba(255,255,255,0.08)',
+                    background: selectedOppId === x.triad_id ? '#131824' : '#11141c'
+                  }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>
                     <span>{x.demand.item}</span>
                     <span style={{ color: '#38bdf8', fontSize: '11px' }}>{x.triad_id}</span>
@@ -151,12 +163,13 @@
                   <div className="row"><span>Contract Value</span><span className="val">₹{x.demand.total_value.toLocaleString()}</span></div>
                   <div className="row"><span>Capital Gap Unlocked</span><span className="val">₹{x.unlocked_capital_required.toLocaleString()}</span></div>
                   <div className="row"><span>Projected Economic GDP Multiplier (1.75x)</span><span className="val">₹{x.projected_gdp_impact.toLocaleString()}</span></div>
+                  <div className="row"><span>Status</span><span className="val" style={{ color: x.status === 'FINANCED' ? '#38bdf8' : '#e2e8f0' }}>{x.status}</span></div>
                 </div>
               ))}
             </div>
           </div>
 
-          <DemoSection onUpdate={load} currentOppId="OPP-9001" />
+          <DemoSection onUpdate={load} currentOppId={selectedOppId} />
         </div>
       );
     }

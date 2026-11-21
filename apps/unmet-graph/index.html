@@ -3,29 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONDUIT — Unmet-Economy Graph</title>
+  <title>CONDUIT — Unmet-Economy Graph Visualizer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
-    a { color: #94a3b8; text-decoration: none; }
+    :root {
+      --bg: #07090e;
+      --card-bg: #0d111a;
+      --border: rgba(255, 255, 255, 0.08);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.2);
+      --green: #00e599;
+      --amber: #f59e0b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --display: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.07), transparent 70%),
+        radial-gradient(circle at 100% 100%, rgba(0, 229, 153, 0.03), transparent 50%);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 1.75rem 2.25rem;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
     a:hover { color: #fff; }
-    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
-    .canvas-wrap { background: #0c0f16; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; height: 350px; position: relative; margin-bottom: 1.5rem; overflow: hidden; }
-    canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    @media(max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1.1rem; border-radius: 4px; }
-    .row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px; }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-pill {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      letter-spacing: 0.08em;
+    }
+
+    .legend-strip {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 11px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Live Summary Strip */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 0.9rem 1.4rem;
+      border-radius: 6px;
+      margin-bottom: 1.4rem;
+      font-size: 12px;
+    }
+    .strip-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+    .strip-val { color: #fff; font-weight: 700; font-size: 14px; margin-top: 0.15rem; }
+
+    /* Canvas Wrapper */
+    .canvas-wrap {
+      background: #090c14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      height: 400px;
+      position: relative;
+      margin-bottom: 1.4rem;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      font-size: 10px;
+      color: var(--dim);
+      background: rgba(7, 9, 14, 0.7);
+      padding: 0.25rem 0.6rem;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      pointer-events: none;
+    }
+
+    /* Two Column Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.4rem;
+      margin-bottom: 1.4rem;
+    }
+    @media(max-width: 950px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem 1.4rem;
+      transition: all 0.2s;
+    }
+
+    .card-title {
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 11px;
+    }
     .val { color: #fff; font-weight: 600; }
-    .btn { background: #fff; color: #090a0d; border: none; padding: 0.45rem 0.85rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-    .legend { display: flex; gap: 1.2rem; font-size: 11px; color: #94a3b8; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+    .corridor-item {
+      background: #090c13;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.7rem 0.9rem;
+      border-radius: 4px;
+      margin-bottom: 0.6rem;
+      transition: all 0.15s;
+    }
+    .corridor-item:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      background: #0c101a;
+    }
+
+    .tag-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tag-badge.financed {
+      background: rgba(0, 229, 153, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(0, 229, 153, 0.3);
+    }
+    .tag-badge.detected {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* Buttons */
+    .btn {
+      background: #fff;
+      color: #090a0d;
+      border: 1px solid #fff;
+      padding: 0.5rem 0.9rem;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover { background: #e2e8f0; }
+    .btn.btn-cyan {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      color: #07090e;
+    }
+    .btn.btn-cyan:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
   </style>
 </head>
 <body>
@@ -34,48 +246,70 @@
   <script type="text/babel">
     const API = 'http://127.0.0.1:8088';
 
-    function DemoSection({ onUpdate, currentOppId }) {
+    // Interactive Demo Section Floating Stepper
+    function DemoSection({ onUpdate, currentOppId = 'OPP-9001' }) {
       const [open, setOpen] = React.useState(false);
       const [step, setStep] = React.useState(1);
       const [audit, setAudit] = React.useState(null);
+      const [loading, setLoading] = React.useState(false);
 
       const runStep = (s) => {
+        setLoading(true);
         fetch(`${API}/api/demo/execute-step?step=${s}&opportunity_id=${currentOppId}`)
           .then(r => r.json())
           .then(res => {
+            setLoading(false);
             setStep(s);
             setAudit(res.audit);
             if (onUpdate) onUpdate();
-          });
+          })
+          .catch(() => setLoading(false));
       };
 
       return (
-        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
           {!open ? (
-            <button onClick={() => setOpen(true)} className="btn" style={{ padding: '0.5rem 0.9rem', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }}></span>
-              Demo Steps
+            <button 
+              onClick={() => setOpen(true)} 
+              className="btn btn-cyan" 
+              style={{ padding: '0.65rem 1.15rem', boxShadow: '0 6px 24px rgba(0,0,0,0.6)' }}
+            >
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#090a0d' }}></span>
+              Demo Simulation Steps
             </button>
           ) : (
-            <div style={{ width: '320px', background: '#0d1017', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', padding: '1rem', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Demo</span>
-                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '14px' }}>&times;</span>
+            <div style={{ width: '340px', background: '#0d111a', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '6px', padding: '1.1rem', boxShadow: '0 12px 40px rgba(0,0,0,0.85)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem' }}>
+                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Mesh Stepper</span>
+                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '16px', lineHeight: 1 }}>&times;</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.3rem', marginBottom: '0.8rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem', marginBottom: '0.9rem' }}>
                 {[1, 2, 3, 4].map(n => (
-                  <button key={n} onClick={() => runStep(n)} style={{ background: step === n ? '#1e293b' : '#11141c', color: step === n ? '#fff' : '#64748b', border: '1px solid rgba(255,255,255,0.08)', padding: '0.35rem 0', borderRadius: '2px', cursor: 'pointer', fontSize: '10px' }}>
-                    S{n}
+                  <button 
+                    key={n} 
+                    onClick={() => runStep(n)} 
+                    style={{ 
+                      background: step === n ? '#1e293b' : '#090c13', 
+                      color: step === n ? '#fff' : '#64748b', 
+                      border: step === n ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.08)', 
+                      padding: '0.45rem 0', 
+                      borderRadius: '3px', 
+                      cursor: 'pointer', 
+                      fontSize: '11px',
+                      fontWeight: 700
+                    }}
+                  >
+                    Step {n}
                   </button>
                 ))}
               </div>
               {audit && (
-                <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                <div style={{ fontSize: '11px', color: '#cbd5e1', background: '#07090e', padding: '0.75rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
                     <span>Score: <strong style={{ color: '#fff' }}>{audit.score}</strong></span>
-                    <span>Consensus: <strong style={{ color: '#fff' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
+                    <span>Consensus: <strong style={{ color: 'var(--cyan)' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
                   </div>
-                  <div style={{ color: '#94a3b8', fontSize: '10px' }}>{audit.lender_verdict}</div>
+                  <div style={{ color: '#94a3b8', fontSize: '10px', marginTop: '0.3rem' }}>{audit.lender_verdict}</div>
                 </div>
               )}
             </div>
@@ -87,20 +321,24 @@
     function App() {
       const [g, setG] = React.useState(null);
       const [selectedNode, setSelectedNode] = React.useState(null);
+      const [selectedOppId, setSelectedOppId] = React.useState('OPP-9001');
       const canvasRef = React.useRef(null);
       const positionsRef = React.useRef({});
 
       const load = () => {
-        fetch(`${API}/api/graph`).then(r => r.json()).then(d => {
-          setG(d.data);
-          if (d.data && d.data.nodes.length > 0 && !selectedNode) {
-            setSelectedNode(d.data.nodes[0]);
-          }
-        });
+        fetch(`${API}/api/graph`)
+          .then(r => r.json())
+          .then(d => {
+            setG(d.data);
+            if (d.data && d.data.nodes.length > 0 && !selectedNode) {
+              setSelectedNode(d.data.nodes[3] || d.data.nodes[0]); // default to MSME-101
+            }
+          });
       };
 
       React.useEffect(load, []);
 
+      // Canvas Rendering with Particle Physics
       React.useEffect(() => {
         if (!g || !canvasRef.current) return;
         const cv = canvasRef.current;
@@ -116,58 +354,96 @@
         const suppliers = g.nodes.filter(n => n.type === 'SUPPLIER');
         const pos = {};
 
-        buyers.forEach((b, i) => pos[b.id] = {x: w * 0.16, y: h * (0.22 + i * 0.3), node: b});
-        msmes.forEach((m, i) => pos[m.id] = {x: w * 0.5, y: h * (0.22 + i * 0.3), node: m});
-        suppliers.forEach((s, i) => pos[s.id] = {x: w * 0.84, y: h * (0.22 + i * 0.3), node: s});
+        buyers.forEach((b, i) => pos[b.id] = { x: w * 0.16, y: h * (0.22 + i * 0.28), node: b });
+        msmes.forEach((m, i) => pos[m.id] = { x: w * 0.50, y: h * (0.22 + i * 0.28), node: m });
+        suppliers.forEach((s, i) => pos[s.id] = { x: w * 0.84, y: h * (0.22 + i * 0.28), node: s });
         positionsRef.current = pos;
 
         let frame;
         let t = 0;
+
         function draw() {
           ctx.clearRect(0, 0, w, h);
-          t += 0.025;
+          t += 0.02;
 
+          // Draw Section Columns Background Glows
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.015)';
+          ctx.fillRect(w * 0.04, 0, w * 0.24, h);
+          ctx.fillStyle = 'rgba(0, 229, 153, 0.015)';
+          ctx.fillRect(w * 0.38, 0, w * 0.24, h);
+          ctx.fillStyle = 'rgba(245, 158, 11, 0.015)';
+          ctx.fillRect(w * 0.72, 0, w * 0.24, h);
+
+          // Column Headers
+          ctx.font = '10px JetBrains Mono';
+          ctx.fillStyle = '#64748b';
+          ctx.textAlign = 'center';
+          ctx.fillText('VERIFIED BUYERS', w * 0.16, 28);
+          ctx.fillText('PRODUCER SHIFT CAPACITY', w * 0.50, 28);
+          ctx.fillText('CERTIFIED SUPPLIERS', w * 0.84, 28);
+
+          // Draw Edges & Flow Particles
           g.links.forEach(l => {
             const p1 = pos[l.source];
             const p2 = pos[l.target];
             if (!p1 || !p2) return;
 
+            const isFinanced = l.status === 'FINANCED';
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = l.status === 'VERIFIED' ? 'rgba(56, 189, 248, 0.4)' : 'rgba(255, 255, 255, 0.1)';
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = isFinanced ? 'rgba(0, 229, 153, 0.45)' : 'rgba(56, 189, 248, 0.25)';
+            ctx.lineWidth = isFinanced ? 2 : 1.2;
             ctx.stroke();
 
-            const prog = (t + (l.capital_gap || 0)) % 1;
+            // Moving Pulse Particles
+            const prog = (t + (l.volume_units * 0.001)) % 1;
             const px = p1.x + (p2.x - p1.x) * prog;
             const py = p1.y + (p2.y - p1.y) * prog;
             ctx.beginPath();
-            ctx.arc(px, py, 2, 0, Math.PI * 2);
-            ctx.fillStyle = '#38bdf8';
+            ctx.arc(px, py, isFinanced ? 3.5 : 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = isFinanced ? '#00e599' : '#38bdf8';
+            ctx.shadowColor = isFinanced ? '#00e599' : '#38bdf8';
+            ctx.shadowBlur = 8;
             ctx.fill();
+            ctx.shadowBlur = 0;
           });
 
+          // Draw Nodes
           Object.values(pos).forEach(p => {
             const isSel = selectedNode && selectedNode.id === p.node.id;
+            const radius = isSel ? 10 : (p.node.size ? p.node.size / 3.2 : 7);
+
+            // Outer selection halo
+            if (isSel) {
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, radius + 6, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+              ctx.fill();
+            }
+
+            // Node Circle
             ctx.beginPath();
-            ctx.arc(p.x, p.y, isSel ? 8 : 5, 0, Math.PI * 2);
-
-            let col = '#e2e8f0';
-            if (p.node.type === 'BUYER') col = '#38bdf8';
-            if (p.node.type === 'SUPPLIER') col = '#94a3b8';
-
-            ctx.fillStyle = col;
+            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.node.color || '#fff';
             ctx.fill();
+
             if (isSel) {
               ctx.strokeStyle = '#fff';
-              ctx.lineWidth = 2;
+              ctx.lineWidth = 2.5;
               ctx.stroke();
             }
 
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = '10px JetBrains Mono';
-            ctx.fillText(p.node.name, p.x - 25, p.y - 10);
+            // Text Label
+            ctx.textAlign = 'center';
+            ctx.fillStyle = isSel ? '#fff' : '#cbd5e1';
+            ctx.font = isSel ? 'bold 11px Space Grotesk' : '10px JetBrains Mono';
+            ctx.fillText(p.node.name, p.x, p.y - 14);
+
+            // Sub text category / role
+            ctx.fillStyle = '#64748b';
+            ctx.font = '9px JetBrains Mono';
+            ctx.fillText(p.node.category ? p.node.category.slice(0, 22) : p.node.type, p.x, p.y + 20);
           });
 
           frame = requestAnimationFrame(draw);
@@ -187,65 +463,146 @@
         for (const p of Object.values(positionsRef.current)) {
           const dx = clickX - p.x;
           const dy = clickY - p.y;
-          if (Math.sqrt(dx * dx + dy * dy) < 20) {
+          if (Math.sqrt(dx * dx + dy * dy) < 24) {
             setSelectedNode(p.node);
             break;
           }
         }
       };
 
-      if (!g) return <div style={{padding: '2rem'}}>Loading...</div>;
+      if (!g) return (
+        <div style={{ padding: '3rem', color: var(--muted), display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cyan)' }}></span>
+          Loading Topological Network Mesh...
+        </div>
+      );
+
+      const m = g.metrics;
 
       return (
         <div>
-          <div className="top">
-            <div>
-              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>Unmet-Economy Graph</strong>
+          {/* Top Bar */}
+          <div className="top-bar">
+            <div className="brand-wrap">
+              <a href="../../index.html">&larr; Root Hub</a>
+              <span style={{ color: 'var(--dim)' }}>/</span>
+              <span className="brand-pill">ELEMENT 07</span>
+              <strong style={{ color: '#fff', fontSize: '13px' }}>Unmet-Economy Graph Topology</strong>
             </div>
-            <div className="legend">
-              <div><span className="dot" style={{ background: '#38bdf8' }}></span>Buyers</div>
-              <div><span className="dot" style={{ background: '#e2e8f0' }}></span>Producers</div>
-              <div><span className="dot" style={{ background: '#94a3b8' }}></span>Suppliers</div>
+
+            <div className="legend-strip">
+              <div className="legend-item"><span className="dot" style={{ background: '#38bdf8' }}></span>Buyers (Verified Ingest)</div>
+              <div className="legend-item"><span className="dot" style={{ background: '#00e599' }}></span>MSME Producers (Shift Physics)</div>
+              <div className="legend-item"><span className="dot" style={{ background: '#f59e0b' }}></span>Suppliers (Certified Material)</div>
             </div>
           </div>
 
+          {/* Metric Summary Ribbon */}
+          <div className="summary-strip">
+            <div>
+              <div className="strip-label">Topology Nodes</div>
+              <div className="strip-val">{m.total_nodes} Verified Entities</div>
+            </div>
+            <div>
+              <div className="strip-label">Active Corridors</div>
+              <div className="strip-val">{m.total_edges} Trade Edges</div>
+            </div>
+            <div>
+              <div className="strip-label">Active Opportunities</div>
+              <div className="strip-val" style={{ color: 'var(--cyan)' }}>{m.active_opportunities} Matched Triads</div>
+            </div>
+            <div>
+              <div className="strip-label">Compiled Contracts</div>
+              <div className="strip-val" style={{ color: 'var(--green)' }}>{m.compiled_contracts} Tranche Agreements</div>
+            </div>
+            <div>
+              <div className="strip-label">Network Mesh Density</div>
+              <div className="strip-val">{m.network_density}</div>
+            </div>
+          </div>
+
+          {/* Canvas Interactive Simulation */}
           <div className="canvas-wrap">
-            <canvas ref={canvasRef} onClick={handleCanvasClick} title="Click any node"></canvas>
+            <canvas ref={canvasRef} onClick={handleCanvasClick}></canvas>
+            <div className="canvas-hint">Click any entity node to inspect telemetry parameters &amp; active credit links</div>
           </div>
 
           <div className="grid">
+            {/* Selected Node Inspector */}
             <div className="card">
-              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>Node Inspector</div>
+              <div className="card-title">
+                <span>Selected Node Inspector</span>
+                {selectedNode && (
+                  <span style={{ color: selectedNode.color, fontSize: '11px', fontWeight: 700 }}>
+                    {selectedNode.type} // {selectedNode.id}
+                  </span>
+                )}
+              </div>
+
               {selectedNode ? (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 700, fontSize: '14px', marginBottom: '0.4rem' }}>
-                    <span>{selectedNode.name}</span>
-                    <span style={{ fontSize: '11px', color: '#38bdf8' }}>{selectedNode.type}</span>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '0.4rem', fontFamily: 'Space Grotesk' }}>
+                    {selectedNode.name}
                   </div>
+                  <div style={{ color: 'var(--dim)', fontSize: '11px', marginBottom: '1rem' }}>
+                    Sector / Material: {selectedNode.category}
+                  </div>
+
                   {Object.entries(selectedNode.details || {}).map(([k, v]) => (
                     <div key={k} className="row">
-                      <span style={{ textTransform: 'capitalize', color: '#94a3b8' }}>{k.replace(/_/g, ' ')}</span>
+                      <span style={{ textTransform: 'capitalize', color: 'var(--muted)' }}>
+                        {k.replace(/_/g, ' ')}
+                      </span>
                       <span className="val">{typeof v === 'number' ? v.toLocaleString() : String(v)}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div style={{ color: '#64748b', fontSize: '11px' }}>Click any node on the graph.</div>
+                <div style={{ color: 'var(--dim)', fontStyle: 'italic', padding: '1rem 0' }}>
+                  Click any entity node on the canvas above.
+                </div>
               )}
             </div>
 
+            {/* Active Corridors Feed */}
             <div className="card">
-              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>Corridors ({g.links.length})</div>
-              {g.links.map((l, i) => (
-                <div key={i} className="row" style={{ padding: '0.4rem 0' }}>
-                  <span>{l.source} &rarr; {l.target}</span>
-                  <span className="val">₹{Number(l.capital_gap).toLocaleString()}</span>
-                </div>
-              ))}
+              <div className="card-title">
+                <span>Active Supply &amp; Demand Corridors ({g.links.length})</span>
+                <span style={{ fontSize: '11px', color: 'var(--dim)', fontWeight: 400 }}>Closed-Loop Multi-Party</span>
+              </div>
+
+              <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                {g.links.map((l, idx) => (
+                  <div 
+                    key={idx} 
+                    className="corridor-item"
+                    onClick={() => setSelectedOppId(l.opportunity_id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                      <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>
+                        {l.source} &rarr; {l.target}
+                      </span>
+                      <span className={`tag-badge ${l.status === 'FINANCED' ? 'financed' : 'detected'}`}>
+                        {l.status}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--dim)' }}>
+                      <span>{l.type.replace(/_/g, ' ')}</span>
+                      <span style={{ color: 'var(--cyan)', fontWeight: 600 }}>₹{Number(l.capital_gap).toLocaleString()}</span>
+                    </div>
+                    {l.item && (
+                      <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '0.2rem' }}>
+                        Order: {l.item} ({l.volume_units} units)
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <DemoSection onUpdate={load} currentOppId="OPP-9001" />
+          <DemoSection onUpdate={load} currentOppId={selectedOppId} />
         </div>
       );
     }

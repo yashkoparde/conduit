@@ -1,9 +1,234 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta http-equiv="refresh" content="0; url=https://drive.google.com/file/d/16rJE79SLMwtV-MM_NJ8Hl3HsGc0R6iZR/view?usp=drive_link">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONDUIT — MSME Mobile Application & Telemetry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
+    a { color: #94a3b8; text-decoration: none; }
+    a:hover { color: #fff; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
+    .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; }
+    @media(max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 4px; margin-bottom: 1rem; }
+    .row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .val { color: #fff; font-weight: 600; }
+    .meter { height: 4px; background: #1e2638; margin: 0.5rem 0 0.8rem 0; border-radius: 2px; overflow: hidden; }
+    .fill { height: 100%; background: #38bdf8; }
+    .btn { background: #fff; color: #090a0d; border: none; padding: 0.45rem 0.85rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:hover { background: #e2e8f0; color: #090a0d; }
+    .btn-secondary { background: transparent; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .btn-secondary:hover { background: rgba(56, 189, 248, 0.1); color: #fff; }
+    input, select { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.4rem; border-radius: 2px; width: 100%; margin: 0.2rem 0 0.5rem 0; }
+    label { font-size: 10px; color: #94a3b8; text-transform: uppercase; }
+    .badge { font-size: 10px; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 2px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); color: #38bdf8; }
+  </style>
 </head>
 <body>
-  Redirecting to <a href="https://drive.google.com/file/d/16rJE79SLMwtV-MM_NJ8Hl3HsGc0R6iZR/view?usp=drive_link">MSME Mobile App Download</a>...
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const API = 'http://127.0.0.1:8088';
+
+    function App() {
+      const [feed, setFeed] = React.useState(null);
+      const [showRegister, setShowRegister] = React.useState(false);
+      const [name, setName] = React.useState('');
+      const [industry, setIndustry] = React.useState('Apparel & Garments');
+      const [location, setLocation] = React.useState('Tirupur, TN');
+      const [maxCap, setMaxCap] = React.useState(1000);
+      const [currProd, setCurrProd] = React.useState(300);
+      const [bottleneck, setBottleneck] = React.useState('Raw Material Fabric Liquidity');
+      const [msg, setMsg] = React.useState('');
+
+      const load = () => {
+        fetch(`${API}/api/demand-detector/feed`)
+          .then(r => r.json())
+          .then(d => setFeed(d.feed))
+          .catch(err => console.error(err));
+      };
+
+      React.useEffect(load, []);
+
+      const registerMSME = (e) => {
+        e.preventDefault();
+        fetch(`${API}/api/msmes/create`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            business_name: name,
+            industry,
+            location,
+            max_monthly_capacity: Number(maxCap),
+            current_production: Number(currProd),
+            capital_bottleneck: bottleneck
+          })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            setMsg(`Registered ${res.msme_id} and ran auto-matching.`);
+            setShowRegister(false);
+            setName('');
+            load();
+          } else {
+            setMsg(res.error || 'Registration failed');
+          }
+        });
+      };
+
+      if (!feed) return <div style={{padding: '2rem'}}>Loading MSME Telemetry...</div>;
+
+      const msmes = feed.msmes || [];
+
+      return (
+        <div>
+          <div className="top">
+            <div>
+              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>MSME Mobile App &amp; Telemetry Hub</strong>
+            </div>
+            <div style={{ display: 'flex', gap: '0.6rem' }}>
+              <button className="btn btn-secondary" onClick={() => setShowRegister(!showRegister)}>
+                {showRegister ? 'Cancel' : '+ Register Shop Floor'}
+              </button>
+              <a href="/conduit-mobile/app/build/outputs/apk/debug/conduit.apk" download className="btn">
+                Download APK (20.5 MB) &darr;
+              </a>
+            </div>
+          </div>
+
+          {msg && (
+            <div style={{ background: '#131824', border: '1px solid #38bdf8', padding: '0.6rem 1rem', borderRadius: '4px', marginBottom: '1.2rem', color: '#fff', fontSize: '12px' }}>
+              {msg}
+            </div>
+          )}
+
+          {showRegister && (
+            <div className="card" style={{ marginBottom: '1.5rem', background: '#131824' }}>
+              <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.8rem' }}>Register Shop Floor Telemetry</div>
+              <form onSubmit={registerMSME} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.8rem', alignItems: 'end' }}>
+                <div>
+                  <label>Business / Producer Name</label>
+                  <input type="text" placeholder="e.g. Kaveri Precision Loom" value={name} onChange={e => setName(e.target.value)} required />
+                </div>
+                <div>
+                  <label>Industry Sector</label>
+                  <select value={industry} onChange={e => setIndustry(e.target.value)}>
+                    <option value="Apparel & Garments">Apparel &amp; Garments</option>
+                    <option value="Light Engineering & Auto Components">Light Engineering &amp; Auto Components</option>
+                    <option value="Food Processing & Packaging">Food Processing &amp; Packaging</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Location / Cluster</label>
+                  <input type="text" value={location} onChange={e => setLocation(e.target.value)} required />
+                </div>
+                <div>
+                  <label>Max Rated Capacity (Units/mo)</label>
+                  <input type="number" value={maxCap} onChange={e => setMaxCap(e.target.value)} required />
+                </div>
+                <div>
+                  <label>Current Production (Units/mo)</label>
+                  <input type="number" value={currProd} onChange={e => setCurrProd(e.target.value)} required />
+                </div>
+                <div>
+                  <label>Diagnosed Capital Bottleneck</label>
+                  <input type="text" value={bottleneck} onChange={e => setBottleneck(e.target.value)} required />
+                </div>
+                <div>
+                  <button type="submit" className="btn" style={{ width: '100%', height: '32px' }}>Attest Shop Floor</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="grid">
+            {/* Left: Active Live MSME Telemetry */}
+            <div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.6rem' }}>
+                Live Attested Producers ({msmes.length})
+              </div>
+              {msmes.map(m => {
+                const idle = m.max_monthly_capacity - m.current_production;
+                const util = m.max_monthly_capacity > 0 ? Math.round((m.current_production / m.max_monthly_capacity) * 100) : 0;
+                return (
+                  <div key={m.id} className="card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <div>
+                        <span style={{ fontWeight: 700, color: '#fff' }}>{m.business_name}</span>
+                        <span className="badge" style={{ marginLeft: '0.6rem' }}>{m.id}</span>
+                      </div>
+                      <span style={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}>{util}% Utilized</span>
+                    </div>
+                    <div style={{ color: '#94a3b8', fontSize: '11px', margin: '0.2rem 0' }}>{m.industry} &bull; {m.location}</div>
+                    
+                    <div className="meter"><div className="fill" style={{ width: `${util}%` }}></div></div>
+
+                    <div className="row"><span>Monthly Rated Capacity</span><span className="val">{m.max_monthly_capacity} units</span></div>
+                    <div className="row"><span>Active Production</span><span className="val">{m.current_production} units</span></div>
+                    <div className="row"><span>Idle Equipment Headroom</span><span className="val" style={{ color: '#38bdf8' }}>{idle} units</span></div>
+                    <div className="row"><span>Diagnosed Bottleneck</span><span className="val">{m.capital_bottleneck}</span></div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right: Mobile Client Spec & Architecture */}
+            <div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.6rem' }}>
+                Mobile Architecture &amp; Client Telemetry
+              </div>
+              <div className="card">
+                <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>
+                  Native Android Stack
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '0.8rem' }}>
+                  Jetpack Compose &bull; Material 3 &bull; Bhashini / Groq LLMs &bull; Ktor Client
+                </div>
+                <div className="row"><span>Voice Application</span><span className="val">Kannada, Hindi, English</span></div>
+                <div className="row"><span>Telemetry Ingestion</span><span className="val">Direct SQLite Sync</span></div>
+                <div className="row"><span>Digital Twin</span><span className="val">Live Shift &amp; Output Physics</span></div>
+                <div className="row"><span>Daily UPI Split</span><span className="val">Automated Repayment Escrow</span></div>
+                
+                <div style={{ marginTop: '1.2rem', display: 'flex', gap: '0.6rem' }}>
+                  <a href="/conduit-mobile/app/build/outputs/apk/debug/conduit.apk" download className="btn" style={{ flex: 1, justifyContent: 'center' }}>
+                    Download APK
+                  </a>
+                  <a href="https://drive.google.com/file/d/16rJE79SLMwtV-MM_NJ8Hl3HsGc0R6iZR/view?usp=drive_link" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }}>
+                    Google Drive Mirror &rarr;
+                  </a>
+                </div>
+              </div>
+
+              <div className="card">
+                <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>
+                  Ecosystem Navigation
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '0.6rem' }}>
+                  Once shop floors register capacity, they interconnect with other modules:
+                </div>
+                <div className="row"><span>02 Demand Verification</span><a href="../demand-verification/index.html">Open &rarr;</a></div>
+                <div className="row"><span>03 Demand Detector</span><a href="../demand-detector/index.html">Open &rarr;</a></div>
+                <div className="row"><span>04 Capital Simulator</span><a href="../capital-simulator/index.html">Open &rarr;</a></div>
+                <div className="row"><span>05 Loan Designer</span><a href="../loan-designer/index.html">Open &rarr;</a></div>
+                <div className="row"><span>06 Gap Intelligence</span><a href="../gap-engine/index.html">Open &rarr;</a></div>
+                <div className="row"><span>07 Unmet Economy Graph</span><a href="../unmet-graph/index.html">Open &rarr;</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
 </body>
 </html>

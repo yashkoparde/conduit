@@ -3,33 +3,393 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONDUIT — Demand Verification</title>
+  <title>CONDUIT — Distributed Demand Verification</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #090a0d; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2rem; line-height: 1.5; }
-    a { color: #94a3b8; text-decoration: none; }
+    :root {
+      --bg: #07090e;
+      --card-bg: #0d111a;
+      --card-active: #121826;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(56, 189, 248, 0.4);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.15);
+      --green: #00e599;
+      --green-glow: rgba(0, 229, 153, 0.15);
+      --amber: #f59e0b;
+      --red: #f87171;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --display: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.07), transparent 70%),
+        radial-gradient(circle at 100% 100%, rgba(0, 229, 153, 0.03), transparent 50%);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 1.75rem 2.25rem;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
     a:hover { color: #fff; }
-    .top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.5rem; align-items: baseline; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-    @media(max-width: 1024px) { .grid { grid-template-columns: 1fr 1fr; } }
-    @media(max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: #11141c; border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 4px; }
-    .card.active { border-color: rgba(255,255,255,0.25); background: #131824; }
-    .btn { background: #fff; color: #090a0d; border: none; padding: 0.5rem 0.9rem; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-    .btn:hover { background: #e2e8f0; }
-    .btn.reset { background: transparent; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); margin-left: 0.75rem; }
-    .row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
-    .val { color: #fff; font-weight: 600; }
-    .meter { height: 4px; background: #1e2638; margin: 0.75rem 0 1rem 0; border-radius: 2px; overflow: hidden; }
-    .fill { height: 100%; background: #38bdf8; transition: width 0.3s; }
-    input { background: #090c13; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: inherit; font-size: 11px; padding: 0.4rem; border-radius: 2px; width: 100%; margin: 0.2rem 0 0.5rem 0; }
-    label { font-size: 10px; color: #94a3b8; text-transform: uppercase; }
+
+    /* Top Nav Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-pill {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      letter-spacing: 0.08em;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .selector-label {
+      font-size: 11px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    select, input[type="text"], input[type="number"] {
+      background: #090c13;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 0.45rem 0.65rem;
+      border-radius: 4px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    select:focus, input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+
+    /* Buttons */
+    .btn {
+      background: #fff;
+      color: #090a0d;
+      border: 1px solid #fff;
+      padding: 0.5rem 0.9rem;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:hover { background: #e2e8f0; border-color: #e2e8f0; }
+    .btn:active { transform: translateY(1px); }
+
+    .btn.btn-cyan {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      color: #07090e;
+    }
+    .btn.btn-cyan:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
+
+    .btn.reset {
+      background: rgba(248, 113, 113, 0.08);
+      color: var(--red);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+    .btn.reset:hover {
+      background: rgba(248, 113, 113, 0.18);
+      border-color: var(--red);
+    }
+
+    /* Hero Dossier Card */
+    .hero-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 1.4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--cyan);
+    }
+
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.1rem;
+    }
+
+    .hero-title {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .triad-path {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .triad-arrow { color: var(--cyan); font-weight: bold; }
+
+    /* Score Badge Box */
+    .score-badge-box {
+      background: #090c13;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 0.75rem 1.25rem;
+      text-align: right;
+      min-width: 170px;
+    }
+    .score-number {
+      font-family: var(--display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #fff;
+    }
+
+    /* Progress Meter */
+    .progress-wrap {
+      margin: 1rem 0;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .progress-track {
+      height: 6px;
+      background: #192030;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, var(--cyan));
+      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+
+    /* Stat Ribbons */
+    .stat-ribbon {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.2rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+    }
+    .stat-label { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-val { color: #fff; font-weight: 600; font-size: 13px; margin-top: 0.15rem; }
+
+    /* 4-Column Grid */
+    .party-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+    }
+    @media(max-width: 1150px) { .party-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 650px) { .party-grid { grid-template-columns: 1fr; } }
+
+    .party-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .party-card.verified {
+      border-color: rgba(56, 189, 248, 0.35);
+      background: linear-gradient(180deg, #101624 0%, #0d121c 100%);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .party-card.verified::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: var(--cyan);
+    }
+
+    .party-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .party-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+    }
+    .status-badge.verified {
+      background: rgba(0, 229, 153, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(0, 229, 153, 0.3);
+    }
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .party-name {
+      font-family: var(--display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .form-group { margin-bottom: 0.6rem; }
+    .form-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem; }
+
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 11px;
+    }
+    .kv-label { color: var(--muted); }
+    .kv-val { color: #fff; font-weight: 600; }
+
+    .sig-box {
+      margin-top: 0.75rem;
+      background: #090c13;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      padding: 0.45rem 0.55rem;
+      border-radius: 4px;
+      font-size: 10px;
+      color: var(--dim);
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    .sig-prefix { color: var(--cyan); font-weight: bold; }
+
+    /* Technical Formula Box */
+    .formula-box {
+      background: #090c14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.35rem;
+      margin-bottom: 1.4rem;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Ledger Table */
+    .ledger-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+    }
+    .table-title {
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th {
+      color: var(--dim);
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.5rem 0.4rem;
+      text-align: left;
+    }
+    td {
+      padding: 0.55rem 0.4rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -38,48 +398,70 @@
   <script type="text/babel">
     const API = 'http://127.0.0.1:8088';
 
+    // Interactive Demo Walkthrough Floating Controller
     function DemoSection({ onUpdate, currentOppId }) {
       const [open, setOpen] = React.useState(false);
       const [step, setStep] = React.useState(1);
       const [audit, setAudit] = React.useState(null);
+      const [loading, setLoading] = React.useState(false);
 
       const runStep = (s) => {
+        setLoading(true);
         fetch(`${API}/api/demo/execute-step?step=${s}&opportunity_id=${currentOppId}`)
           .then(r => r.json())
           .then(res => {
+            setLoading(false);
             setStep(s);
             setAudit(res.audit);
             if (onUpdate) onUpdate();
-          });
+          })
+          .catch(() => setLoading(false));
       };
 
       return (
-        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
           {!open ? (
-            <button onClick={() => setOpen(true)} className="btn" style={{ padding: '0.5rem 0.9rem', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }}></span>
-              Demo Steps
+            <button 
+              onClick={() => setOpen(true)} 
+              className="btn btn-cyan" 
+              style={{ padding: '0.65rem 1.15rem', boxShadow: '0 6px 24px rgba(0,0,0,0.6)' }}
+            >
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#090a0d' }}></span>
+              Demo Simulation Steps
             </button>
           ) : (
-            <div style={{ width: '320px', background: '#0d1017', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', padding: '1rem', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Demo</span>
-                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '14px' }}>&times;</span>
+            <div style={{ width: '340px', background: '#0d111a', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '6px', padding: '1.1rem', boxShadow: '0 12px 40px rgba(0,0,0,0.85)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem' }}>
+                <span style={{ fontWeight: 700, color: '#fff', fontSize: '12px' }}>Interactive Proof Stepper</span>
+                <span onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#94a3b8', fontSize: '16px', lineHeight: 1 }}>&times;</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.3rem', marginBottom: '0.8rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem', marginBottom: '0.9rem' }}>
                 {[1, 2, 3, 4].map(n => (
-                  <button key={n} onClick={() => runStep(n)} style={{ background: step === n ? '#1e293b' : '#11141c', color: step === n ? '#fff' : '#64748b', border: '1px solid rgba(255,255,255,0.08)', padding: '0.35rem 0', borderRadius: '2px', cursor: 'pointer', fontSize: '10px' }}>
-                    S{n}
+                  <button 
+                    key={n} 
+                    onClick={() => runStep(n)} 
+                    style={{ 
+                      background: step === n ? '#1e293b' : '#090c13', 
+                      color: step === n ? '#fff' : '#64748b', 
+                      border: step === n ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.08)', 
+                      padding: '0.45rem 0', 
+                      borderRadius: '3px', 
+                      cursor: 'pointer', 
+                      fontSize: '11px',
+                      fontWeight: 700
+                    }}
+                  >
+                    Step {n}
                   </button>
                 ))}
               </div>
               {audit && (
-                <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                <div style={{ fontSize: '11px', color: '#cbd5e1', background: '#07090e', padding: '0.75rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
                     <span>Score: <strong style={{ color: '#fff' }}>{audit.score}</strong></span>
-                    <span>Consensus: <strong style={{ color: '#fff' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
+                    <span>Consensus: <strong style={{ color: 'var(--cyan)' }}>{(audit.consensus_ratio * 100).toFixed(0)}%</strong></span>
                   </div>
-                  <div style={{ color: '#94a3b8', fontSize: '10px' }}>{audit.lender_verdict}</div>
+                  <div style={{ color: '#94a3b8', fontSize: '10px', marginTop: '0.3rem' }}>{audit.lender_verdict}</div>
                 </div>
               )}
             </div>
@@ -91,43 +473,68 @@
     function App() {
       const [dossier, setDossier] = React.useState(null);
       const [score, setScore] = React.useState(null);
+      const [oppList, setOppList] = React.useState([]);
+      const [selectedOpp, setSelectedOpp] = React.useState('OPP-9001');
 
+      // Controlled Attestation Inputs
       const [buyerUnits, setBuyerUnits] = React.useState(500);
+      const [buyerEscrow, setBuyerEscrow] = React.useState(true);
       const [supplierStock, setSupplierStock] = React.useState(500);
+      const [supplierCost, setSupplierCost] = React.useState(320);
       const [msmeHours, setMsmeHours] = React.useState(180);
+      const [msmeOperators, setMsmeOperators] = React.useState(14);
       const [logisticsRating, setLogisticsRating] = React.useState(98);
 
-      const load = () => {
-        fetch(`${API}/api/verification/dossier?id=OPP-9001`)
+      const load = (oppId = selectedOpp) => {
+        fetch(`${API}/api/verification/dossier?id=${oppId}`)
           .then(r => r.json())
           .then(d => {
             setDossier(d);
-            return fetch(`${API}/api/score?id=OPP-9001`);
+            if (d.opportunity) {
+              setBuyerUnits(d.opportunity.units_demanded || 500);
+              setSupplierStock(d.opportunity.demanded_units || 500);
+              setSupplierCost(d.opportunity.supplier_unit_price || 320);
+            }
+            return fetch(`${API}/api/score?id=${oppId}`);
           })
           .then(r => r.json())
           .then(d => setScore(d.data || null))
           .catch(e => console.error(e));
       };
 
-      React.useEffect(load, []);
+      React.useEffect(() => {
+        fetch(`${API}/api/opportunities`)
+          .then(r => r.json())
+          .then(res => setOppList(res.opportunities || []))
+          .catch(e => console.error(e));
+      }, []);
+
+      React.useEffect(() => {
+        load(selectedOpp);
+      }, [selectedOpp]);
 
       const attest = (type, params) => {
         fetch(`${API}/api/verification/submit`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ opportunity_id: 'OPP-9001', participant_type: type, parameters: params })
-        }).then(load);
+          body: JSON.stringify({ opportunity_id: selectedOpp, participant_type: type, parameters: params })
+        }).then(() => load(selectedOpp));
       };
 
       const reset = () => {
         fetch(`${API}/api/verification/reset`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ opportunity_id: 'OPP-9001' })
-        }).then(load);
+          body: JSON.stringify({ opportunity_id: selectedOpp })
+        }).then(() => load(selectedOpp));
       };
 
-      if (!dossier) return <div style={{padding: '2rem'}}>Loading...</div>;
+      if (!dossier) return (
+        <div style={{ padding: '3rem', color: var(--muted), display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cyan)' }}></span>
+          Loading Distributed Verification Dossier...
+        </div>
+      );
 
       const opp = dossier.opportunity;
       const c = dossier.consensus;
@@ -137,161 +544,335 @@
 
       return (
         <div>
-          <div className="top">
-            <div>
-              <a href="../../index.html">&larr; Root</a> &nbsp;&bull;&nbsp; <strong style={{ color: '#fff' }}>Distributed Demand Verification</strong>
+          {/* Top Navbar */}
+          <div className="top-bar">
+            <div className="brand-wrap">
+              <a href="../../index.html">&larr; Root Hub</a>
+              <span style={{ color: 'var(--dim)' }}>/</span>
+              <span className="brand-pill">ELEMENT 02</span>
+              <strong style={{ color: '#fff', fontSize: '13px' }}>Distributed Demand Verification</strong>
             </div>
-            <div>
-              Consensus: <strong style={{ color: '#fff' }}>{c.percentage}</strong> ({c.status})
-              <button className="btn reset" onClick={reset}>Reset</button>
+
+            <div className="top-controls">
+              <span className="selector-label">Target Opportunity:</span>
+              <select 
+                value={selectedOpp} 
+                onChange={e => setSelectedOpp(e.target.value)}
+              >
+                {oppList.map(o => (
+                  <option key={o.id} value={o.id}>{o.id} — {o.msme_name} ({o.item_description.slice(0, 24)}...)</option>
+                ))}
+              </select>
+              <button className="btn reset" onClick={reset} title="Clear counterparty attestation signatures">
+                Reset Proofs
+              </button>
             </div>
           </div>
 
-          {/* Minimal Summary Strip */}
-          <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          {/* Master Dossier Summary Card */}
+          <div className="hero-card">
+            <div className="hero-header">
               <div>
-                <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{opp.item_description}</div>
-                <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '0.2rem' }}>
-                  {opp.msme_name} &nbsp;&bull;&nbsp; {opp.buyer_name} &nbsp;&bull;&nbsp; {opp.supplier_name}
+                <div className="hero-title">{opp.item_description}</div>
+                <div className="triad-path">
+                  <span>Buyer: <strong style={{ color: '#fff' }}>{opp.buyer_name}</strong></span>
+                  <span className="triad-arrow">&rarr;</span>
+                  <span>MSME: <strong style={{ color: '#fff' }}>{opp.msme_name}</strong></span>
+                  <span className="triad-arrow">&rarr;</span>
+                  <span>Supplier: <strong style={{ color: '#fff' }}>{opp.supplier_name}</strong></span>
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Credit Score &nbsp;</span>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{score ? score.score : 0}</span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}> / 900</span>
+
+              {score && (
+                <div className="score-badge-box">
+                  <div style={{ fontSize: '10px', color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Computed Credit Score</div>
+                  <div className="score-number">{score.score} <span style={{ fontSize: '13px', color: 'var(--dim)' }}>/ 900</span></div>
+                  <div style={{ fontSize: '11px', color: score.score >= 750 ? 'var(--green)' : 'var(--amber)', fontWeight: 600 }}>{score.tier}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="progress-wrap">
+              <div className="progress-meta">
+                <span>Multi-Party Consensus Weight: <strong style={{ color: '#fff' }}>{c.earned_weight} / {c.total_weight} pts</strong></span>
+                <span>Verification Ratio: <strong style={{ color: 'var(--cyan)' }}>{c.percentage}</strong> ({c.status})</span>
+              </div>
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: c.percentage }}></div>
               </div>
             </div>
 
-            <div className="meter"><div className="fill" style={{ width: c.percentage }}></div></div>
-
-            <div style={{ display: 'flex', gap: '2rem', fontSize: '11px', color: '#94a3b8' }}>
-              <div>Volume: <span className="val">{opp.units_demanded} units</span></div>
-              <div>Price: <span className="val">₹{opp.unit_target_price}</span></div>
-              <div>Capital Gap: <span className="val">₹{Number(opp.estimated_financing_required).toLocaleString()}</span></div>
-              <div>Verified Weight: <span className="val">{c.earned_weight} / {c.total_weight} pts</span></div>
+            <div className="stat-ribbon">
+              <div>
+                <div className="stat-label">Demanded Volume</div>
+                <div className="stat-val">{opp.units_demanded} units</div>
+              </div>
+              <div>
+                <div className="stat-label">Unit Target Price</div>
+                <div className="stat-val">₹{Number(opp.unit_target_price).toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="stat-label">Gross Order Value</div>
+                <div className="stat-val">₹{(opp.units_demanded * opp.unit_target_price).toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="stat-label">Capital Gap To Finance</div>
+                <div className="stat-val" style={{ color: 'var(--cyan)' }}>₹{Number(opp.estimated_financing_required).toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="stat-label">Delivery Deadline</div>
+                <div className="stat-val">{opp.delivery_deadline}</div>
+              </div>
             </div>
           </div>
 
-          {/* 4 Clean Cards */}
-          <div className="grid">
-            {/* Buyer */}
-            <div className={`card ${has('BUYER') ? 'active' : ''}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Buyer (35%)</span>
-                {has('BUYER') && <span style={{ color: '#fff', fontWeight: 600, fontSize: '11px' }}>Attested</span>}
+          {/* Mathematical Formulation Explainer */}
+          <div className="formula-box">
+            <strong style={{ color: '#fff' }}>Cryptographic Proof Consensus Formulation:</strong><br />
+            Consensus Ratio <span style={{ color: 'var(--cyan)' }}>C_R = ∑ (w_i · I_proof) = {c.percentage}</span>. 
+            Each participant attestation digitally signs payload hash <code style={{ color: '#fff', background: '#000', padding: '0.1rem 0.35rem', borderRadius: '3px' }}>H = SHA256(OppID || PartyType || Parameters)</code> and writes immutably to the ledger. 100% consensus enables automated closed-loop tranche disbursement.
+          </div>
+
+          {/* 4 Counterparty Interactive Cards */}
+          <div className="party-grid">
+            {/* Buyer Card */}
+            <div className={`party-card ${has('BUYER') ? 'verified' : ''}`}>
+              <div>
+                <div className="party-top">
+                  <span className="party-tag">Buyer (35% Weight)</span>
+                  <span className={`status-badge ${has('BUYER') ? 'verified' : 'pending'}`}>
+                    {has('BUYER') ? '✓ Verified' : 'Pending Proof'}
+                  </span>
+                </div>
+                <div className="party-name">{opp.buyer_name}</div>
+                <div style={{ fontSize: '11px', color: 'var(--dim)', marginBottom: '0.9rem' }}>Type: {opp.buyer_type || 'Verified Enterprise'}</div>
+
+                {!has('BUYER') ? (
+                  <div>
+                    <div className="form-group">
+                      <label className="form-label">Confirmed Purchase Units</label>
+                      <input type="number" value={buyerUnits} onChange={e => setBuyerUnits(Number(e.target.value))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Escrow Sweep Commitment</label>
+                      <select value={buyerEscrow ? '1' : '0'} onChange={e => setBuyerEscrow(e.target.value === '1')} style={{ width: '100%' }}>
+                        <option value="1">Direct Closed-Loop Escrow Sweep (Optimal)</option>
+                        <option value="0">Standard Post-Delivery 60-Day AP</option>
+                      </select>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="kv-row">
+                      <span className="kv-label">Confirmed Demand</span>
+                      <span className="kv-val">{JSON.parse(getProof('BUYER').parameters_json).confirmed_units} Units</span>
+                    </div>
+                    <div className="kv-row">
+                      <span className="kv-label">Escrow Lock</span>
+                      <span className="kv-val" style={{ color: 'var(--green)' }}>Active (Zero Cash Diversion)</span>
+                    </div>
+                    <div className="sig-box">
+                      <span className="sig-prefix">SIG:</span> {getProof('BUYER').digital_signature.slice(0, 26)}...
+                    </div>
+                  </div>
+                )}
               </div>
-              <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.6rem' }}>{opp.buyer_name}</div>
-              {!has('BUYER') ? (
-                <div>
-                  <label>Confirmed Units</label>
-                  <input type="number" value={buyerUnits} onChange={e => setBuyerUnits(Number(e.target.value))} />
-                  <button className="btn" style={{ width: '100%' }} onClick={() => attest('BUYER', { confirmed_units: buyerUnits, payment_escrow_ready: true })}>
-                    Attest
-                  </button>
-                </div>
-              ) : (
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  <div className="row"><span>Units</span><span className="val">{JSON.parse(getProof('BUYER').parameters_json).confirmed_units}</span></div>
-                  <div className="row"><span>Escrow</span><span className="val">Locked</span></div>
-                </div>
+
+              {!has('BUYER') && (
+                <button 
+                  className="btn btn-cyan" 
+                  style={{ width: '100%', marginTop: '0.8rem' }}
+                  onClick={() => attest('BUYER', { confirmed_units: buyerUnits, payment_escrow_ready: buyerEscrow })}
+                >
+                  Sign &amp; Attest (+35%)
+                </button>
               )}
             </div>
 
-            {/* Supplier */}
-            <div className={`card ${has('SUPPLIER') ? 'active' : ''}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Supplier (30%)</span>
-                {has('SUPPLIER') && <span style={{ color: '#fff', fontWeight: 600, fontSize: '11px' }}>Attested</span>}
+            {/* Supplier Card */}
+            <div className={`party-card ${has('SUPPLIER') ? 'verified' : ''}`}>
+              <div>
+                <div className="party-top">
+                  <span className="party-tag">Supplier (30% Weight)</span>
+                  <span className={`status-badge ${has('SUPPLIER') ? 'verified' : 'pending'}`}>
+                    {has('SUPPLIER') ? '✓ Verified' : 'Pending Proof'}
+                  </span>
+                </div>
+                <div className="party-name">{opp.supplier_name}</div>
+                <div style={{ fontSize: '11px', color: 'var(--dim)', marginBottom: '0.9rem' }}>Material: {opp.material_type || 'Raw Inventory'}</div>
+
+                {!has('SUPPLIER') ? (
+                  <div>
+                    <div className="form-group">
+                      <label className="form-label">Reserved Inventory Stock Units</label>
+                      <input type="number" value={supplierStock} onChange={e => setSupplierStock(Number(e.target.value))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Locked Material Price (INR/Unit)</label>
+                      <input type="number" value={supplierCost} onChange={e => setSupplierCost(Number(e.target.value))} />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="kv-row">
+                      <span className="kv-label">Inventory Earmarked</span>
+                      <span className="kv-val">{JSON.parse(getProof('SUPPLIER').parameters_json).allocated_stock_units} Units</span>
+                    </div>
+                    <div className="kv-row">
+                      <span className="kv-label">Locked Unit Cost</span>
+                      <span className="kv-val">₹{JSON.parse(getProof('SUPPLIER').parameters_json).confirmed_unit_cost}</span>
+                    </div>
+                    <div className="sig-box">
+                      <span className="sig-prefix">SIG:</span> {getProof('SUPPLIER').digital_signature.slice(0, 26)}...
+                    </div>
+                  </div>
+                )}
               </div>
-              <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.6rem' }}>{opp.supplier_name}</div>
-              {!has('SUPPLIER') ? (
-                <div>
-                  <label>Stock Units</label>
-                  <input type="number" value={supplierStock} onChange={e => setSupplierStock(Number(e.target.value))} />
-                  <button className="btn" style={{ width: '100%' }} onClick={() => attest('SUPPLIER', { allocated_stock_units: supplierStock, confirmed_unit_cost: 320 })}>
-                    Attest
-                  </button>
-                </div>
-              ) : (
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  <div className="row"><span>Allocated</span><span className="val">{JSON.parse(getProof('SUPPLIER').parameters_json).allocated_stock_units}</span></div>
-                  <div className="row"><span>Cost</span><span className="val">₹320/u</span></div>
-                </div>
+
+              {!has('SUPPLIER') && (
+                <button 
+                  className="btn btn-cyan" 
+                  style={{ width: '100%', marginTop: '0.8rem' }}
+                  onClick={() => attest('SUPPLIER', { allocated_stock_units: supplierStock, confirmed_unit_cost: supplierCost })}
+                >
+                  Sign &amp; Attest (+30%)
+                </button>
               )}
             </div>
 
-            {/* MSME */}
-            <div className={`card ${has('MSME') ? 'active' : ''}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>MSME (25%)</span>
-                {has('MSME') && <span style={{ color: '#fff', fontWeight: 600, fontSize: '11px' }}>Attested</span>}
+            {/* MSME Producer Card */}
+            <div className={`party-card ${has('MSME') ? 'verified' : ''}`}>
+              <div>
+                <div className="party-top">
+                  <span className="party-tag">MSME Producer (25% Weight)</span>
+                  <span className={`status-badge ${has('MSME') ? 'verified' : 'pending'}`}>
+                    {has('MSME') ? '✓ Verified' : 'Pending Proof'}
+                  </span>
+                </div>
+                <div className="party-name">{opp.msme_name}</div>
+                <div style={{ fontSize: '11px', color: 'var(--dim)', marginBottom: '0.9rem' }}>Sector: {opp.industry}</div>
+
+                {!has('MSME') ? (
+                  <div>
+                    <div className="form-group">
+                      <label className="form-label">Pledged Factory Shift Hours</label>
+                      <input type="number" value={msmeHours} onChange={e => setMsmeHours(Number(e.target.value))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Active Certified Operators</label>
+                      <input type="number" value={msmeOperators} onChange={e => setMsmeOperators(Number(e.target.value))} />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="kv-row">
+                      <span className="kv-label">Pledged Machine Time</span>
+                      <span className="kv-val">{JSON.parse(getProof('MSME').parameters_json).pledged_shift_hours} Hours</span>
+                    </div>
+                    <div className="kv-row">
+                      <span className="kv-label">Assigned Operators</span>
+                      <span className="kv-val">{JSON.parse(getProof('MSME').parameters_json).active_operators} Active</span>
+                    </div>
+                    <div className="sig-box">
+                      <span className="sig-prefix">SIG:</span> {getProof('MSME').digital_signature.slice(0, 26)}...
+                    </div>
+                  </div>
+                )}
               </div>
-              <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.6rem' }}>{opp.msme_name}</div>
-              {!has('MSME') ? (
-                <div>
-                  <label>Shift Hours</label>
-                  <input type="number" value={msmeHours} onChange={e => setMsmeHours(Number(e.target.value))} />
-                  <button className="btn" style={{ width: '100%' }} onClick={() => attest('MSME', { pledged_shift_hours: msmeHours, active_operators: 14 })}>
-                    Attest
-                  </button>
-                </div>
-              ) : (
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  <div className="row"><span>Pledged</span><span className="val">{JSON.parse(getProof('MSME').parameters_json).pledged_shift_hours} hrs</span></div>
-                  <div className="row"><span>Operators</span><span className="val">14 Active</span></div>
-                </div>
+
+              {!has('MSME') && (
+                <button 
+                  className="btn btn-cyan" 
+                  style={{ width: '100%', marginTop: '0.8rem' }}
+                  onClick={() => attest('MSME', { pledged_shift_hours: msmeHours, active_operators: msmeOperators })}
+                >
+                  Sign &amp; Attest (+25%)
+                </button>
               )}
             </div>
 
-            {/* Logistics */}
-            <div className={`card ${has('LOGISTICS') ? 'active' : ''}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Logistics (10%)</span>
-                {has('LOGISTICS') && <span style={{ color: '#fff', fontWeight: 600, fontSize: '11px' }}>Attested</span>}
+            {/* Logistics Card */}
+            <div className={`party-card ${has('LOGISTICS') ? 'verified' : ''}`}>
+              <div>
+                <div className="party-top">
+                  <span className="party-tag">Corridor Logistics (10% Weight)</span>
+                  <span className={`status-badge ${has('LOGISTICS') ? 'verified' : 'pending'}`}>
+                    {has('LOGISTICS') ? '✓ Verified' : 'Pending Proof'}
+                  </span>
+                </div>
+                <div className="party-name">Dedicated Transit Corridor</div>
+                <div style={{ fontSize: '11px', color: 'var(--dim)', marginBottom: '0.9rem' }}>Carrier: National Freight Mesh</div>
+
+                {!has('LOGISTICS') ? (
+                  <div>
+                    <div className="form-group">
+                      <label className="form-label">Corridor Delivery Rating (0 - 100)</label>
+                      <input type="number" min="0" max="100" value={logisticsRating} onChange={e => setLogisticsRating(Number(e.target.value))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Telemetry Feed</label>
+                      <input type="text" value="GPS Live Waybill Enabled" readOnly style={{ color: 'var(--muted)' }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="kv-row">
+                      <span className="kv-label">Route Reliability</span>
+                      <span className="kv-val">{JSON.parse(getProof('LOGISTICS').parameters_json).corridor_delivery_rating}% Verified</span>
+                    </div>
+                    <div className="kv-row">
+                      <span className="kv-label">Asset Tracking</span>
+                      <span className="kv-val" style={{ color: 'var(--cyan)' }}>Active Beacon</span>
+                    </div>
+                    <div className="sig-box">
+                      <span className="sig-prefix">SIG:</span> {getProof('LOGISTICS').digital_signature.slice(0, 26)}...
+                    </div>
+                  </div>
+                )}
               </div>
-              <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.6rem' }}>Corridor Logistics</div>
-              {!has('LOGISTICS') ? (
-                <div>
-                  <label>Corridor Score (0-100)</label>
-                  <input type="number" value={logisticsRating} onChange={e => setLogisticsRating(Number(e.target.value))} />
-                  <button className="btn" style={{ width: '100%' }} onClick={() => attest('LOGISTICS', { corridor_delivery_rating: logisticsRating, vehicle_assigned: true })}>
-                    Attest
-                  </button>
-                </div>
-              ) : (
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  <div className="row"><span>Rating</span><span className="val">{JSON.parse(getProof('LOGISTICS').parameters_json).corridor_delivery_rating}%</span></div>
-                  <div className="row"><span>Tracking</span><span className="val">GPS Active</span></div>
-                </div>
+
+              {!has('LOGISTICS') && (
+                <button 
+                  className="btn btn-cyan" 
+                  style={{ width: '100%', marginTop: '0.8rem' }}
+                  onClick={() => attest('LOGISTICS', { corridor_delivery_rating: logisticsRating, vehicle_assigned: true })}
+                >
+                  Sign &amp; Attest (+10%)
+                </button>
               )}
             </div>
           </div>
 
-          {/* Simple Proofs Table */}
-          <div className="card">
-            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>
-              Proof Ledger ({proofs.length})
+          {/* Cryptographic Ledger Table */}
+          <div className="ledger-card">
+            <div className="table-title">
+              <span>Cryptographic Proof Ledger ({proofs.length} Attestations)</span>
+              <span style={{ fontSize: '11px', color: 'var(--dim)', fontWeight: 400 }}>Engine: SHA-256 Digest Authentication</span>
             </div>
+
             {proofs.length === 0 ? (
-              <div style={{ color: '#64748b', fontSize: '11px' }}>No proofs submitted.</div>
+              <div style={{ color: 'var(--dim)', padding: '1rem 0', fontStyle: 'italic' }}>
+                No active cryptographic proofs committed. Attest counterparties above or trigger demo steps to build consensus.
+              </div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+              <table>
                 <thead>
-                  <tr style={{ color: '#94a3b8', borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'left' }}>
-                    <th style={{ padding: '0.3rem' }}>Party</th>
-                    <th style={{ padding: '0.3rem' }}>Weight</th>
-                    <th style={{ padding: '0.3rem' }}>Signature</th>
-                    <th style={{ padding: '0.3rem' }}>Time</th>
+                  <tr>
+                    <th>Participant Type</th>
+                    <th>Participant ID</th>
+                    <th>Assigned Weight</th>
+                    <th>Cryptographic Signature Digest</th>
+                    <th>Verification Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
                   {proofs.map(p => (
-                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding: '0.4rem 0.3rem', color: '#fff', fontWeight: 600 }}>{p.participant_type}</td>
-                      <td style={{ padding: '0.4rem 0.3rem', color: '#94a3b8' }}>{p.weight_assigned} pts</td>
-                      <td style={{ padding: '0.4rem 0.3rem', color: '#64748b', fontFamily: 'monospace' }}>{p.digital_signature.slice(0, 24)}...</td>
-                      <td style={{ padding: '0.4rem 0.3rem', color: '#64748b' }}>{p.verified_at || p.created_at}</td>
+                    <tr key={p.id}>
+                      <td><strong style={{ color: '#fff' }}>{p.participant_type}</strong></td>
+                      <td style={{ color: 'var(--muted)' }}>{p.participant_id}</td>
+                      <td><span style={{ color: 'var(--cyan)', fontWeight: 600 }}>{p.weight_assigned || 25} pts</span></td>
+                      <td style={{ color: 'var(--dim)', fontFamily: 'monospace' }}>{p.digital_signature}</td>
+                      <td style={{ color: 'var(--dim)' }}>{p.verified_at || p.created_at}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -299,7 +880,7 @@
             )}
           </div>
 
-          <DemoSection onUpdate={load} currentOppId="OPP-9001" />
+          <DemoSection onUpdate={() => load(selectedOpp)} currentOppId={selectedOpp} />
         </div>
       );
     }
