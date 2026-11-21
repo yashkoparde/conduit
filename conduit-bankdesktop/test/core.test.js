@@ -76,7 +76,7 @@ test('production server supports applicant CRUD, validated CSV import, refresh r
     assert.match(root.headers.get('content-security-policy'), /frame-ancestors 'none'/);
     const deepRoute = await fetch(`${baseUrl}/applications`);
     assert.equal(deepRoute.status, 200);
-    assert.match(await deepRoute.text(), /Karnataka Loan Intelligence/);
+    assert.match(await deepRoute.text(), /Conduit-Bank/);
 
     const createdResponse = await fetch(`${baseUrl}/api/applicants`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sample()) });
     assert.equal(createdResponse.status, 201);

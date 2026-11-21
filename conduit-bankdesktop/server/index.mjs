@@ -208,7 +208,7 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`Karnataka Loan Intelligence is ready at http://${host}:${port}`);
+  console.log(`Conduit-Bank is ready at http://${host}:${port}`);
   console.log(`Local records are stored in ${dbFile}`);
   console.log('Demo mode only. Do not enter live banking credentials or sensitive financial records.');
 });

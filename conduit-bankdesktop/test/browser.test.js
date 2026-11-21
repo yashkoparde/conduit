@@ -49,7 +49,7 @@ test('production interface works in Chrome or Edge across login, applicant flows
     page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 
     await page.goto(`${baseUrl}/#/login`, { waitUntil: 'networkidle' });
-    assert.match(await page.title(), /Karnataka Loan Intelligence/);
+    assert.match(await page.title(), /Conduit-Bank/);
     assert.equal(await page.locator('.art-scene').evaluate((element) => getComputedStyle(element).transformStyle), 'preserve-3d', 'login artwork should use layered CSS 3D');
     await page.screenshot({ path: resolve(workDir, 'login-screen.png'), fullPage: true });
     await page.getByLabel('Email or username').fill('wrong@example.com');

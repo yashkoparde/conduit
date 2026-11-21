@@ -98,8 +98,8 @@ function IconWord({ icon: Icon, children }) {
 function BrandMark({ compact = false }) {
   return (
     <div className={`brand-lockup ${compact ? 'brand-compact' : ''}`}>
-      <div className="brand-mark" aria-hidden="true"><span>K</span><i /></div>
-      {!compact && <div className="brand-name-wrap"><span className="brand-name">KARNATAKA <b>LOAN</b></span><span className="brand-caption">INTELLIGENCE</span></div>}
+      <div className="brand-mark" aria-hidden="true"><span>C</span><i /></div>
+      {!compact && <div className="brand-name-wrap"><span className="brand-name">CONDUIT <b>BANK</b></span><span className="brand-caption">LOAN INTELLIGENCE</span></div>}
     </div>
   );
 }
@@ -292,7 +292,7 @@ function Sidebar({ route, navigate, logout, lang, t, profileName, mobileOpen }) 
   ];
   return (
     <aside className={`sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
-      <div className="sidebar-head"><BrandMark /><div className="sidebar-live"><span />{lang === 'kn' ? 'ಕರ್ನಾಟಕ' : 'KARNATAKA'}</div></div>
+      <div className="sidebar-head"><BrandMark /><div className="sidebar-live"><span />{lang === 'kn' ? 'ಕಾಂಡ್ಯೂಟ್' : 'CONDUIT'}</div></div>
       <div className="sidebar-section-label">{t('navSection')}</div>
       <nav className="sidebar-nav" aria-label={t('navSection')}>
         {nav.map(({ id, label, icon: Icon }) => <button key={id} className={`nav-item ${route === id ? 'active' : ''}`} onClick={() => navigate(id)} aria-current={route === id ? 'page' : undefined}><Icon size={17} strokeWidth={1.75} /><span>{label}</span>{id === 'dashboard' && <span className="nav-shortcut">⌘ 1</span>}</button>)}
@@ -311,7 +311,7 @@ function Topbar({ lang, setLang, theme, setTheme, t, profileName, onMenu, onSett
   return (
     <header className="topbar">
       <button className="mobile-menu icon-button" aria-label={t('navSection')} onClick={onMenu}><Menu size={19} /></button>
-      <div className="top-breadcrumb"><span className="breadcrumb-root">KLI</span><ChevronRight size={14} /><b>{({ dashboard: t('dashboard'), applications: t('applications'), applicants: t('applicants'), pending: t('pending'), 'documents-pending': t('documentsPending'), approved: t('approved'), rejected: t('rejected'), followups: t('followups'), settings: t('settings') })[initialRoute()] || t('dashboard')}</b></div>
+      <div className="top-breadcrumb"><span className="breadcrumb-root">CONDUIT</span><ChevronRight size={14} /><b>{({ dashboard: t('dashboard'), applications: t('applications'), applicants: t('applicants'), pending: t('pending'), 'documents-pending': t('documentsPending'), approved: t('approved'), rejected: t('rejected'), followups: t('followups'), settings: t('settings') })[initialRoute()] || t('dashboard')}</b></div>
       <div className="top-actions"><span className="secure-pill"><ShieldCheck size={14} />{lang === 'kn' ? 'ಸ್ಥಳೀಯ ಡೆಮೊ' : 'LOCAL DEMO'}</span><LocaleSwitch lang={lang} setLang={setLang} compact /><ThemeToggle theme={theme} setTheme={setTheme} t={t} /><button className="top-avatar" onClick={onSettings} title={profileName}>{profileName.slice(0, 1).toUpperCase()}</button></div>
     </header>
   );
@@ -352,10 +352,10 @@ function LoginScreen({ lang, setLang, t, onLogin }) {
         <div className="art-scene" aria-hidden="true">
           <div className="art-depth depth-back" /><div className="art-depth depth-front" />
           <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" /><div className="art-red-orbit" />
-          <div className="art-star"><span>K</span><i /><b /></div>
+          <div className="art-star"><span>C</span><i /><b /></div>
           <span className="scene-particle particle-one" /><span className="scene-particle particle-two" /><span className="scene-particle particle-three" />
         </div>
-        <div className="login-art-copy"><div className="eyebrow"><span className="green-dot" /> {lang === 'kn' ? 'ಕರ್ನಾಟಕದ ಸಾಲ ಬುದ್ಧಿಮತ್ತೆ' : 'KARNATAKA LOAN INTELLIGENCE'}</div><h1>{t('loginTitle')}</h1><p>{t('loginSubtitle')}</p><div className="art-rule"><span /><span /><span /></div></div>
+        <div className="login-art-copy"><div className="eyebrow"><span className="green-dot" /> {lang === 'kn' ? 'ಕಾಂಡ್ಯೂಟ್ ಬ್ಯಾಂಕ್ · ಸಾಲ ಬುದ್ಧಿಮತ್ತೆ' : 'CONDUIT-BANK LOAN INTELLIGENCE'}</div><h1>{t('loginTitle')}</h1><p>{t('loginSubtitle')}</p><div className="art-rule"><span /><span /><span /></div></div>
         <div className="art-footer"><span>12°58′ N &nbsp; 77°35′ E</span><span>ಕನ್ನಡ · ENGLISH</span></div>
       </section>
       <section className="login-panel"><div className="login-mobile-brand"><BrandMark /></div><div className="login-card">
@@ -423,7 +423,7 @@ function DashboardPage({ route, applicants, activities, lang, t, profileName, on
   const greetingName = defaultProfile ? t('greetingRole') : profileName.trim().split(/\s+/)[0];
   return (
     <>
-      <div className="page-intro"><div><div className="eyebrow page-eyebrow"><span className="green-dot" /> {lang === 'kn' ? 'ಕರ್ನಾಟಕ · ಸಾಲ ನಿರ್ವಹಣೆ' : 'KARNATAKA · LOAN OPERATIONS'}</div><h1>{t('welcome')}, <span>{greetingName}.</span></h1><p>{t('workspace')}</p></div><button className="button button-primary add-main-button" onClick={onAdd}><Plus size={17} />{t('addApplicant')}</button></div>
+      <div className="page-intro"><div><div className="eyebrow page-eyebrow"><span className="green-dot" /> {lang === 'kn' ? 'ಕಾಂಡ್ಯೂಟ್ ಬ್ಯಾಂಕ್ · ಸಾಲ ನಿರ್ವಹಣೆ' : 'CONDUIT-BANK · LOAN OPERATIONS'}</div><h1>{t('welcome')}, <span>{greetingName}.</span></h1><p>{t('workspace')}</p></div><button className="button button-primary add-main-button" onClick={onAdd}><Plus size={17} />{t('addApplicant')}</button></div>
       <div className="desk-layout">
         <section className="desk-main">
           <div className="section-heading"><div><div className="section-kicker">{t('applicationDesk')}</div><h2>{routeTitle}</h2></div><span className="result-count"><b>{filtered.length}</b> {filtered.length === 1 ? t('request') : t('requests')}</span></div>
@@ -439,7 +439,7 @@ function DashboardPage({ route, applicants, activities, lang, t, profileName, on
         </section>
         <aside className="activity-panel"><div className="activity-heading"><div><span className="section-kicker">{lang === 'kn' ? 'ಕಾರ್ಯಕ್ಷೇತ್ರ ಫೀಡ್' : 'WORKSPACE FEED'}</span><h3>{t('recentActivity')}</h3></div><span className="activity-live"><span /></span></div>
           {activities.length ? <div className="activity-list">{activities.slice(0, 6).map((item) => <div className="activity-item" key={item.id || `${item.applicantId}-${item.happenedAt}`}><div className={`activity-icon activity-${item.action}`}><Activity size={15} /></div><div className="activity-copy"><p><b>{item.applicantName}</b> {t(item.action === 'created' ? 'activityCreated' : item.action === 'status' ? 'activityStatus' : item.action === 'deleted' ? 'activityDeleted' : 'activityUpdated').toLowerCase()}</p><span>{item.applicantId} <i>·</i> {relativeTime(item.happenedAt, lang)}</span></div></div>)}</div> : <div className="activity-empty"><div className="activity-empty-icon"><Activity size={18} /></div><p>{t('noActivity')}</p></div>}
-          <div className="region-note"><div className="region-note-top"><MapPin size={14} /><span>{lang === 'kn' ? 'ಕರ್ನಾಟಕ ಸಂದರ್ಭ' : 'KARNATAKA CONTEXT'}</span></div><strong className="region-word">{lang === 'kn' ? 'ಕರ್ನಾಟಕ' : 'Karnataka'}</strong><span>{lang === 'kn' ? 'ಸ್ಥಳೀಯ ಸಾಲ ಕಾರ್ಯಾಚರಣೆ' : 'Local lending operations'}</span><small>{lang === 'kn' ? 'ಜಿಲ್ಲೆ · ತಾಲೂಕು · ಗ್ರಾಮ' : 'District · Taluk · Village'}</small></div>
+          <div className="region-note"><div className="region-note-top"><MapPin size={14} /><span>{lang === 'kn' ? 'ಕಾಂಡ್ಯೂಟ್ ಬ್ಯಾಂಕ್' : 'CONDUIT-BANK'}</span></div><strong className="region-word">{lang === 'kn' ? 'ಕರ್ನಾಟಕ' : 'Karnataka'}</strong><span>{lang === 'kn' ? 'ಸ್ಥಳೀಯ ಸಾಲ ಕಾರ್ಯಾಚರಣೆ' : 'Local lending operations'}</span><small>{lang === 'kn' ? 'ಜಿಲ್ಲೆ · ತಾಲೂಕು · ಗ್ರಾಮ' : 'District · Taluk · Village'}</small></div>
         </aside>
       </div>
     </>
